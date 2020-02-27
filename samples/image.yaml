@@ -1,0 +1,16 @@
+apiVersion: build.pivotal.io/v1alpha1
+kind: Image
+metadata:
+  name: test-image
+spec:
+  tag: <IMAGE-TAG>
+  serviceAccount: kpack-service-account
+  cacheSize: "1.5Gi"
+  builder:
+    name: default
+    kind: ClusterBuilder
+  source:
+    git:
+      url: https://github.com/projectriff/fats
+      revision: master
+    subPath: applications/uppercase/node

@@ -1,0 +1,16 @@
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: ImageBinding
+metadata:
+  name: test-binding
+spec:
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: test-deployment
+
+  providers:
+    - containerName: test-container
+      imageableRef:
+        name: test-image
+        apiVersion: build.pivotal.io/v1alpha1
+        kind: Image

@@ -8,13 +8,12 @@ import (
 // with a context.Context.
 type bindImagesKey struct{}
 
-// WithSinkURI notes on the context for binding that the resolved SinkURI
-// is the provided apis.URL.
+// WithImages notes on the context for binding that the resolved images
 func WithImages(ctx context.Context, images map[string]string) context.Context {
 	return context.WithValue(ctx, bindImagesKey{}, images)
 }
 
-// GetSinkURI accesses the apis.URL for the Sink URI that has been associated
+// GetImages accesses the resolved images that have been associated
 // with this context.
 func GetImages(ctx context.Context) map[string]string {
 	value := ctx.Value(bindImagesKey{})

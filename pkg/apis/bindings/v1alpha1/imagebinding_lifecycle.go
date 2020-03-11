@@ -10,23 +10,25 @@ import (
 )
 
 const (
-	// ImageBindingConditionReady is set when the binding has been applied to the subjects.
-	ImageBindingConditionReady = apis.ConditionReady
+	ImageBindingConditionReady            = apis.ConditionReady
+	ImageBindingConditionBindingAvailable = "BindingAvailable"
 )
 
-var imgCondSet = apis.NewLivingConditionSet()
+var imgCondSet = apis.NewLivingConditionSet(
+	ImageBindingConditionBindingAvailable,
+)
 
-func (ib *ImageBinding) GetSubject() tracker.Reference {
-	return *ib.Spec.Subject
+func (b *ImageBinding) GetSubject() tracker.Reference {
+	return *b.Spec.Subject
 }
 
-func (ib *ImageBinding) GetBindingStatus() duck.BindableStatus {
-	return &ib.Status
+func (b *ImageBinding) GetBindingStatus() duck.BindableStatus {
+	return &b.Status
 }
 
-func (ib *ImageBinding) Do(ctx context.Context, ps *v1.WithPod) {
+func (b *ImageBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	images := GetImages(ctx)
-	for _, p := range ib.Spec.Providers {
+	for _, p := range b.Spec.Providers {
 		for i, c := range ps.Spec.Template.Spec.Containers {
 			if c.Name == p.ContainerName {
 				img, ok := images[p.ContainerName]
@@ -34,30 +36,30 @@ func (ib *ImageBinding) Do(ctx context.Context, ps *v1.WithPod) {
 					continue
 				}
 				ps.Spec.Template.Spec.Containers[i].Image = img
-				ps.Annotations["io.projectriff.bindings"] = "bound"
+				ps.Annotations[ImageBindingAnnotationKey] = "bound"
 			}
 		}
 	}
 }
 
-func (ib *ImageBinding) Undo(ctx context.Context, ps *v1.WithPod) {
-	//cannot undo
-	ps.Annotations["io.projectriff.bindings"] = "unbound"
+func (b *ImageBinding) Undo(ctx context.Context, ps *v1.WithPod) {
+	// cannot undo
+	delete(ps.Annotations, ImageBindingAnnotationKey)
 }
 
-func (ibs *ImageBindingStatus) InitializeConditions() {
-	imgCondSet.Manage(ibs).InitializeConditions()
+func (bs *ImageBindingStatus) InitializeConditions() {
+	imgCondSet.Manage(bs).InitializeConditions()
 }
 
-func (ibs *ImageBindingStatus) MarkBindingAvailable() {
-	imgCondSet.Manage(ibs).MarkTrue(ImageBindingConditionReady)
+func (bs *ImageBindingStatus) MarkBindingAvailable() {
+	imgCondSet.Manage(bs).MarkTrue(ImageBindingConditionBindingAvailable)
 }
 
-func (ibs *ImageBindingStatus) MarkBindingUnavailable(reason string, message string) {
-	imgCondSet.Manage(ibs).MarkFalse(
-		ImageBindingConditionReady, reason, message)
+func (bs *ImageBindingStatus) MarkBindingUnavailable(reason string, message string) {
+	imgCondSet.Manage(bs).MarkFalse(
+		ImageBindingConditionBindingAvailable, reason, message)
 }
 
-func (ibs *ImageBindingStatus) SetObservedGeneration(gen int64) {
-	ibs.ObservedGeneration = gen
+func (bs *ImageBindingStatus) SetObservedGeneration(gen int64) {
+	bs.ObservedGeneration = gen
 }

@@ -13,6 +13,10 @@ import (
 	"knative.dev/pkg/webhook/psbinding"
 )
 
+const (
+	ImageBindingAnnotationKey = GroupName + "/image-binding"
+)
+
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type ImageBinding struct {
@@ -30,39 +34,22 @@ var (
 	_ kmeta.OwnerRefable = (*ImageBinding)(nil)
 
 	// Check is Bindable
-	_ psbinding.Bindable = (*ImageBinding)(nil)
+	_ psbinding.Bindable  = (*ImageBinding)(nil)
+	_ duck.BindableStatus = (*ImageBindingStatus)(nil)
 )
 
 type ImageBindingSpec struct {
 	Subject   *tracker.Reference `json:"subject,omitempty"`
-	Providers []Provider        `json:"providers,omitempty"`
+	Providers []Provider         `json:"providers,omitempty"`
 }
 
 type Provider struct {
 	ImageableRef  *tracker.Reference `json:"imageableRef, omitempty"`
-	ContainerName string            `json:"containerName,omitempty"`
+	ContainerName string             `json:"containerName,omitempty"`
 }
-
-var (
-	// Check that ImageBinding can be validated and defaulted.
-	_ apis.Validatable   = (*ImageBinding)(nil)
-	_ apis.Defaultable   = (*ImageBinding)(nil)
-	_ kmeta.OwnerRefable = (*ImageBinding)(nil)
-
-	// Check is Bindable
-	_ duck.BindableStatus = (*ImageBindingStatus)(nil)
-)
 
 type ImageBindingStatus struct {
 	duckv1beta1.Status `json:",inline"`
-
-	// ContainerImages contains the current set of images in bound containers on the Source
-	ContainerImages []ContainerImage `json:"containerImages,omitempty"`
-}
-
-type ContainerImage struct {
-	Name  string `json:"name,omitempty"`
-	Image string `json:"image,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -73,22 +60,35 @@ type ImageBindingList struct {
 	Items           []ImageBinding `json:"items"`
 }
 
-func (ib *ImageBinding) Validate(context.Context) *apis.FieldError {
-	return nil
+func (b *ImageBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
+	if b.Spec.Subject.Namespace != b.Namespace {
+		errs = errs.Also(
+			apis.ErrInvalidValue(b.Spec.Subject.Namespace, "spec.subject.namespace"),
+		)
+	}
+	for i, p := range b.Spec.Providers {
+		if p.ImageableRef.Namespace != b.Namespace {
+			errs = errs.Also(
+				apis.ErrInvalidValue(p.ImageableRef.Namespace, "imageableRef.namespace").ViaFieldIndex("spec.providers", i),
+			)
+		}
+	}
+
+	return errs
 }
 
-func (ib *ImageBinding) SetDefaults(context.Context) {
-	if ib.Spec.Subject.Namespace == "" {
+func (b *ImageBinding) SetDefaults(context.Context) {
+	if b.Spec.Subject.Namespace == "" {
 		// Default the subject's namespace to our namespace.
-		ib.Spec.Subject.Namespace = ib.Namespace
+		b.Spec.Subject.Namespace = b.Namespace
 	}
-	for i, p := range ib.Spec.Providers {
+	for i, p := range b.Spec.Providers {
 		if p.ImageableRef.Namespace == "" {
-			ib.Spec.Providers[i].ImageableRef.Namespace = ib.Namespace
+			b.Spec.Providers[i].ImageableRef.Namespace = b.Namespace
 		}
 	}
 }
 
-func (ib *ImageBinding) GetGroupVersionKind() schema.GroupVersionKind {
+func (b *ImageBinding) GetGroupVersionKind() schema.GroupVersionKind {
 	return SchemeGroupVersion.WithKind("ImageBinding")
 }

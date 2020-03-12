@@ -40,10 +40,10 @@ var (
 
 type ImageBindingSpec struct {
 	Subject   *tracker.Reference `json:"subject,omitempty"`
-	Providers []Provider         `json:"providers,omitempty"`
+	Providers []ImageProvider    `json:"providers,omitempty"`
 }
 
-type Provider struct {
+type ImageProvider struct {
 	ImageableRef  *tracker.Reference `json:"imageableRef, omitempty"`
 	ContainerName string             `json:"containerName,omitempty"`
 }

@@ -18,6 +18,14 @@ limitations under the License.
 
 package v1alpha1
 
+// FrogBindingListerExpansion allows custom methods to be added to
+// FrogBindingLister.
+type FrogBindingListerExpansion interface{}
+
+// FrogBindingNamespaceListerExpansion allows custom methods to be added to
+// FrogBindingNamespaceLister.
+type FrogBindingNamespaceListerExpansion interface{}
+
 // ImageBindingListerExpansion allows custom methods to be added to
 // ImageBindingLister.
 type ImageBindingListerExpansion interface{}

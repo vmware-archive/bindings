@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	"github.com/projectriff/bindings/pkg/reconciler/frogbinding"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/configmap"
@@ -40,6 +41,7 @@ import (
 )
 
 var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
+	v1alpha1.SchemeGroupVersion.WithKind("FrogBinding"):  &v1alpha1.FrogBinding{},
 	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"): &v1alpha1.ImageBinding{},
 }
 
@@ -142,6 +144,7 @@ func main() {
 		NewConfigValidationController,
 
 		// For each binding we have a controller and a binding webhook.
+		frogbinding.NewController, NewBindingWebhook("frogbindings", frogbinding.ListAll, nop),
 		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, nop),
 	)
 }

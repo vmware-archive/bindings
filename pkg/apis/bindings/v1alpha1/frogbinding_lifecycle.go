@@ -69,57 +69,65 @@ func (b *FrogBinding) Do(ctx context.Context, ps *v1.WithPod) {
 			existingVolumes.Insert(secretVolume)
 			newVolumes.Insert(secretVolume)
 		}
-		for i, c := range ps.Spec.Template.Spec.Containers {
-			if c.Name != p.ContainerName && p.ContainerName != "" {
-				// ignore the container
-				continue
-			}
-
-			mountPath := ""
-			// lookup predefined mount path
-			for _, e := range c.Env {
-				if e.Name == "CNB_BINDINGS" {
-					mountPath = e.Value
-					break
-				}
-			}
-			if mountPath == "" {
-				// default mount path
-				// TODO is there a better default path?
-				mountPath = "/var/bindings"
-				ps.Spec.Template.Spec.Containers[i].Env = append(ps.Spec.Template.Spec.Containers[i].Env, corev1.EnvVar{
-					Name:  "CNB_BINDINGS",
-					Value: mountPath,
-				})
-			}
-
-			containerVolumes := sets.NewString()
-			for _, vm := range c.VolumeMounts {
-				containerVolumes.Insert(vm.Name)
-			}
-
-			if !containerVolumes.Has(metadataVolume) {
-				// inject metadata
-				ps.Spec.Template.Spec.Containers[i].VolumeMounts = append(ps.Spec.Template.Spec.Containers[i].VolumeMounts, corev1.VolumeMount{
-					Name:      metadataVolume,
-					MountPath: fmt.Sprintf("%s/%s/metadata", mountPath, p.Name),
-					ReadOnly:  true,
-				})
-			}
-			if !containerVolumes.Has(secretVolume) && p.BindingMode == SecretFrogBinding {
-				// inject secret
-				ps.Spec.Template.Spec.Containers[i].VolumeMounts = append(ps.Spec.Template.Spec.Containers[i].VolumeMounts, corev1.VolumeMount{
-					Name:      secretVolume,
-					MountPath: fmt.Sprintf("%s/%s/secret", mountPath, p.Name),
-					ReadOnly:  true,
-				})
-			}
+		for i := range ps.Spec.Template.Spec.InitContainers {
+			b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], metadataVolume, secretVolume, p)
+		}
+		for i := range ps.Spec.Template.Spec.Containers {
+			b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], metadataVolume, secretVolume, p)
 		}
 	}
 
 	// track which volumes are injected, so they can be removed when no longer used
 	ps.Annotations[FrogBindingAnnotationKey] = strings.Join(newVolumes.List(), ",")
 }
+
+func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, metadataVolume, secretVolume string, p FrogProvider) {
+	if c.Name != p.ContainerName && p.ContainerName != "" {
+		// ignore the container
+		return
+	}
+
+	mountPath := ""
+	// lookup predefined mount path
+	for _, e := range c.Env {
+		if e.Name == "CNB_BINDINGS" {
+			mountPath = e.Value
+			break
+		}
+	}
+	if mountPath == "" {
+		// default mount path
+		// TODO is there a better default path?
+		mountPath = "/var/bindings"
+		c.Env = append(c.Env, corev1.EnvVar{
+			Name:  "CNB_BINDINGS",
+			Value: mountPath,
+		})
+	}
+
+	containerVolumes := sets.NewString()
+	for _, vm := range c.VolumeMounts {
+		containerVolumes.Insert(vm.Name)
+	}
+
+	if !containerVolumes.Has(metadataVolume) {
+		// inject metadata
+		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
+			Name:      metadataVolume,
+			MountPath: fmt.Sprintf("%s/%s/metadata", mountPath, p.Name),
+			ReadOnly:  true,
+		})
+	}
+	if !containerVolumes.Has(secretVolume) && p.BindingMode == SecretFrogBinding {
+		// inject secret
+		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
+			Name:      secretVolume,
+			MountPath: fmt.Sprintf("%s/%s/secret", mountPath, p.Name),
+			ReadOnly:  true,
+		})
+	}
+}
+
 
 func (b *FrogBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 	if ps.Annotations == nil {
@@ -136,17 +144,24 @@ func (b *FrogBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 	}
 	ps.Spec.Template.Spec.Volumes = preservedVolumes
 
-	for i, c := range ps.Spec.Template.Spec.Containers {
-		preservedMounts := []corev1.VolumeMount{}
-		for _, vm := range c.VolumeMounts {
-			if !boundVolumes.Has(vm.Name) {
-				preservedMounts = append(preservedMounts, vm)
-			}
-		}
-		ps.Spec.Template.Spec.Containers[i].VolumeMounts = preservedMounts
+	for i := range ps.Spec.Template.Spec.InitContainers {
+		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], &boundVolumes)
+	}
+	for i := range ps.Spec.Template.Spec.Containers {
+		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], &boundVolumes)
 	}
 
 	delete(ps.Annotations, FrogBindingAnnotationKey)
+}
+
+func (b *FrogBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, boundVolumes *sets.String) {
+	preservedMounts := []corev1.VolumeMount{}
+	for _, vm := range c.VolumeMounts {
+		if !boundVolumes.Has(vm.Name) {
+			preservedMounts = append(preservedMounts, vm)
+		}
+	}
+	c.VolumeMounts = preservedMounts
 }
 
 func (bs *FrogBindingStatus) InitializeConditions() {

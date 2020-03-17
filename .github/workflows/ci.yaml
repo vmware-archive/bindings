@@ -38,7 +38,9 @@ jobs:
       with:
         go-version: '1.13'
     - name: Install ko
-      run: GO111MODULE=on go get github.com/google/ko/cmd/ko
+      run: |
+        GO111MODULE=on go get github.com/google/ko/cmd/ko
+        echo "##[add-path]$(go env GOPATH)/bin"
     - name: gcloud auth
       run: |
         gcloud config set disable_prompts True

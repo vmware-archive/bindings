@@ -80,7 +80,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-knative-serving
+  name: binding-system-kpack
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"

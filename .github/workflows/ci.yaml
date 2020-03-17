@@ -80,42 +80,45 @@ jobs:
       )
     runs-on: ubuntu-latest
     steps:
-      - name: gcloud auth
-        run: |
-          gcloud config set disable_prompts True
-          gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
-        env:
-          GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
-      - name: Publish artifacts
-        run: |
-          set -o errexit
-          set -o nounset
-          set -o pipefail
+    - uses: actions/checkout@v2
+    - name: gcloud auth
+      run: |
+        gcloud config set disable_prompts True
+        gcloud auth activate-service-account --key-file <(echo $GCLOUD_CLIENT_SECRET | base64 --decode)
+      env:
+        GCLOUD_CLIENT_SECRET: ${{ secrets.GCLOUD_CLIENT_SECRET }}
+    - name: Publish artifacts
+      run: |
+        set -o errexit
+        set -o nounset
+        set -o pipefail
 
-          readonly version=$(cat VERSION)
-          readonly git_sha=$(git rev-parse HEAD)
-          readonly git_branch=${GITHUB_REF#refs/heads/}
-          readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
-          readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
+        readonly version=$(cat VERSION)
+        readonly git_sha=$(git rev-parse HEAD)
+        readonly git_branch=${GITHUB_REF#refs/heads/}
+        readonly git_timestamp=$(TZ=UTC git show --quiet --date='format-local:%Y%m%d%H%M%S' --format="%cd")
+        readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
-          readonly bucket=gs://projectriff/riff-bindings
+        readonly bucket=gs://projectriff/riff-bindings
 
-          cache_control='Cache-Control: public'
-          if echo $version | grep -iqF snapshot; then
-            cache_control="${cache_control}, max-age=60"
-          else
-            cache_control="${cache_control}, max-age=3600"
-          fi
+        cache_control='Cache-Control: public'
+        if echo $version | grep -iqF snapshot; then
+          cache_control="${cache_control}, max-age=60"
+        else
+          cache_control="${cache_control}, max-age=3600"
+        fi
 
-          gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${slug}/
-          if [[ ${version} != *"-snapshot" ]] ; then
-            gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${version}/
-          fi
+        echo "Promote artifacts"
+        gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${slug}/
+        if [[ ${version} != *"-snapshot" ]] ; then
+          gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${version}/
+        fi
 
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${git_branch}
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${version}
-          if [[ ${version} != *"-snapshot" ]] ; then
-            gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${git_branch}
-            # avoids overwriting existing values
-            gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${version}
-          fi
+        echo "Capture snapshot slug"
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${git_branch}
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${version}
+        if [[ ${version} != *"-snapshot" ]] ; then
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${git_branch}
+          # avoids overwriting existing values
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${version}
+        fi

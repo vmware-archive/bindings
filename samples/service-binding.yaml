@@ -1,5 +1,5 @@
 apiVersion: bindings.projectriff.io/v1alpha1
-kind: FrogBinding
+kind: ServiceBinding
 metadata:
   name: test-binding
 spec:

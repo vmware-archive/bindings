@@ -18,6 +18,6 @@ limitations under the License.
 
 package v1alpha1
 
-type FrogBindingExpansion interface{}
-
 type ImageBindingExpansion interface{}
+
+type ServiceBindingExpansion interface{}

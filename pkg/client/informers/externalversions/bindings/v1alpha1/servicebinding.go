@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// FrogBindingInformer provides access to a shared informer and lister for
-// FrogBindings.
-type FrogBindingInformer interface {
+// ServiceBindingInformer provides access to a shared informer and lister for
+// ServiceBindings.
+type ServiceBindingInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.FrogBindingLister
+	Lister() v1alpha1.ServiceBindingLister
 }
 
-type frogBindingInformer struct {
+type serviceBindingInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewFrogBindingInformer constructs a new informer for FrogBinding type.
+// NewServiceBindingInformer constructs a new informer for ServiceBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFrogBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredFrogBindingInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewServiceBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredServiceBindingInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredFrogBindingInformer constructs a new informer for FrogBinding type.
+// NewFilteredServiceBindingInformer constructs a new informer for ServiceBinding type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredFrogBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredServiceBindingInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().FrogBindings(namespace).List(options)
+				return client.BindingsV1alpha1().ServiceBindings(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().FrogBindings(namespace).Watch(options)
+				return client.BindingsV1alpha1().ServiceBindings(namespace).Watch(options)
 			},
 		},
-		&bindingsv1alpha1.FrogBinding{},
+		&bindingsv1alpha1.ServiceBinding{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *frogBindingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredFrogBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *serviceBindingInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredServiceBindingInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *frogBindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&bindingsv1alpha1.FrogBinding{}, f.defaultInformer)
+func (f *serviceBindingInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&bindingsv1alpha1.ServiceBinding{}, f.defaultInformer)
 }
 
-func (f *frogBindingInformer) Lister() v1alpha1.FrogBindingLister {
-	return v1alpha1.NewFrogBindingLister(f.Informer().GetIndexer())
+func (f *serviceBindingInformer) Lister() v1alpha1.ServiceBindingLister {
+	return v1alpha1.NewServiceBindingLister(f.Informer().GetIndexer())
 }

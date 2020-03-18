@@ -14,13 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package frogbinding
+package servicebinding
 
 import (
 	"context"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	froginformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/frogbinding"
+	serviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -37,34 +37,34 @@ import (
 )
 
 const (
-	controllerAgentName = "frogbinding-controller"
+	controllerAgentName = "servicebinding-controller"
 )
 
-// NewController returns a new FrogBinding reconciler.
+// NewController returns a new ServiceBinding reconciler.
 func NewController(
 	ctx context.Context,
 	cmw configmap.Watcher,
 ) *controller.Impl {
 	logger := logging.FromContext(ctx)
-	frogInformer := froginformer.Get(ctx)
+	serviceInformer := serviceinformer.Get(ctx)
 	dc := dynamicclient.Get(ctx)
 
 	psInformerFactory := podspecable.Get(ctx)
 	c := &psbinding.BaseReconciler{
-		GVR: v1alpha1.SchemeGroupVersion.WithResource("frogbindings"),
+		GVR: v1alpha1.SchemeGroupVersion.WithResource("servicebindings"),
 		Get: func(namespace string, name string) (psbinding.Bindable, error) {
-			return frogInformer.Lister().FrogBindings(namespace).Get(name)
+			return serviceInformer.Lister().ServiceBindings(namespace).Get(name)
 		},
 		DynamicClient: dc,
 		Recorder: record.NewBroadcaster().NewRecorder(
 			scheme.Scheme, corev1.EventSource{Component: controllerAgentName}),
 	}
 
-	impl := controller.NewImpl(c, logger, "FrogBindings")
+	impl := controller.NewImpl(c, logger, "ServiceBindings")
 
 	logger.Info("Setting up event handlers")
 
-	frogInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
+	serviceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	c.Tracker = tracker.New(impl.EnqueueKey, controller.GetTrackerLease(ctx))
 	c.Factory = &duck.CachedInformerFactory{
@@ -77,13 +77,13 @@ func NewController(
 }
 
 func ListAll(ctx context.Context, handler cache.ResourceEventHandler) psbinding.ListAll {
-	frogInformer := froginformer.Get(ctx)
+	serviceInformer := serviceinformer.Get(ctx)
 
-	// Whenever a FrogBinding changes our webhook programming might change.
-	frogInformer.Informer().AddEventHandler(handler)
+	// Whenever a ServiceBinding changes our webhook programming might change.
+	serviceInformer.Informer().AddEventHandler(handler)
 
 	return func() ([]psbinding.Bindable, error) {
-		l, err := frogInformer.Lister().List(labels.Everything())
+		l, err := serviceInformer.Lister().List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}

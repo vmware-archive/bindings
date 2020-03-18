@@ -14,23 +14,23 @@ import (
 )
 
 const (
-	FrogBindingConditionReady            = apis.ConditionReady
-	FrogBindingConditionBindingAvailable = "BindingAvailable"
+	ServiceBindingConditionReady            = apis.ConditionReady
+	ServiceBindingConditionBindingAvailable = "BindingAvailable"
 )
 
-var frogCondSet = apis.NewLivingConditionSet(
-	FrogBindingConditionBindingAvailable,
+var serviceCondSet = apis.NewLivingConditionSet(
+	ServiceBindingConditionBindingAvailable,
 )
 
-func (b *FrogBinding) GetSubject() tracker.Reference {
+func (b *ServiceBinding) GetSubject() tracker.Reference {
 	return *b.Spec.Subject
 }
 
-func (b *FrogBinding) GetBindingStatus() duck.BindableStatus {
+func (b *ServiceBinding) GetBindingStatus() duck.BindableStatus {
 	return &b.Status
 }
 
-func (b *FrogBinding) Do(ctx context.Context, ps *v1.WithPod) {
+func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	// undo existing bindings so we can start clean
 	b.Undo(ctx, ps)
 
@@ -57,7 +57,7 @@ func (b *FrogBinding) Do(ctx context.Context, ps *v1.WithPod) {
 			existingVolumes.Insert(metadataVolume)
 			newVolumes.Insert(metadataVolume)
 		}
-		if p.BindingMode == SecretFrogBinding && !existingVolumes.Has(secretVolume) {
+		if p.BindingMode == SecretServiceBinding && !existingVolumes.Has(secretVolume) {
 			ps.Spec.Template.Spec.Volumes = append(ps.Spec.Template.Spec.Volumes, corev1.Volume{
 				Name: secretVolume,
 				VolumeSource: corev1.VolumeSource{
@@ -78,10 +78,10 @@ func (b *FrogBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	}
 
 	// track which volumes are injected, so they can be removed when no longer used
-	ps.Annotations[FrogBindingAnnotationKey] = strings.Join(newVolumes.List(), ",")
+	ps.Annotations[ServiceBindingAnnotationKey] = strings.Join(newVolumes.List(), ",")
 }
 
-func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, metadataVolume, secretVolume string, p FrogProvider) {
+func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, metadataVolume, secretVolume string, p ServiceCredentialProvider) {
 	if c.Name != p.ContainerName && p.ContainerName != "" {
 		// ignore the container
 		return
@@ -117,7 +117,7 @@ func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1
 			ReadOnly:  true,
 		})
 	}
-	if !containerVolumes.Has(secretVolume) && p.BindingMode == SecretFrogBinding {
+	if !containerVolumes.Has(secretVolume) && p.BindingMode == SecretServiceBinding {
 		// inject secret
 		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
 			Name:      secretVolume,
@@ -127,12 +127,12 @@ func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1
 	}
 }
 
-func (b *FrogBinding) Undo(ctx context.Context, ps *v1.WithPod) {
+func (b *ServiceBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 	if ps.Annotations == nil {
 		ps.Annotations = map[string]string{}
 	}
 
-	boundVolumes := sets.NewString(strings.Split(ps.Annotations[FrogBindingAnnotationKey], ",")...)
+	boundVolumes := sets.NewString(strings.Split(ps.Annotations[ServiceBindingAnnotationKey], ",")...)
 
 	preservedVolumes := []corev1.Volume{}
 	for _, v := range ps.Spec.Template.Spec.Volumes {
@@ -149,10 +149,10 @@ func (b *FrogBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], &boundVolumes)
 	}
 
-	delete(ps.Annotations, FrogBindingAnnotationKey)
+	delete(ps.Annotations, ServiceBindingAnnotationKey)
 }
 
-func (b *FrogBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, boundVolumes *sets.String) {
+func (b *ServiceBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, boundVolumes *sets.String) {
 	preservedMounts := []corev1.VolumeMount{}
 	for _, vm := range c.VolumeMounts {
 		if !boundVolumes.Has(vm.Name) {
@@ -162,19 +162,19 @@ func (b *FrogBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *core
 	c.VolumeMounts = preservedMounts
 }
 
-func (bs *FrogBindingStatus) InitializeConditions() {
-	frogCondSet.Manage(bs).InitializeConditions()
+func (bs *ServiceBindingStatus) InitializeConditions() {
+	serviceCondSet.Manage(bs).InitializeConditions()
 }
 
-func (bs *FrogBindingStatus) MarkBindingAvailable() {
-	frogCondSet.Manage(bs).MarkTrue(FrogBindingConditionBindingAvailable)
+func (bs *ServiceBindingStatus) MarkBindingAvailable() {
+	serviceCondSet.Manage(bs).MarkTrue(ServiceBindingConditionBindingAvailable)
 }
 
-func (bs *FrogBindingStatus) MarkBindingUnavailable(reason string, message string) {
-	frogCondSet.Manage(bs).MarkFalse(
-		FrogBindingConditionBindingAvailable, reason, message)
+func (bs *ServiceBindingStatus) MarkBindingUnavailable(reason string, message string) {
+	serviceCondSet.Manage(bs).MarkFalse(
+		ServiceBindingConditionBindingAvailable, reason, message)
 }
 
-func (bs *FrogBindingStatus) SetObservedGeneration(gen int64) {
+func (bs *ServiceBindingStatus) SetObservedGeneration(gen int64) {
 	bs.ObservedGeneration = gen
 }

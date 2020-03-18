@@ -21,13 +21,13 @@ package fake
 import (
 	"context"
 
-	frogbinding "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/frogbinding"
+	servicebinding "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
 	fake "github.com/projectriff/bindings/pkg/client/injection/informers/factory/fake"
 	controller "knative.dev/pkg/controller"
 	injection "knative.dev/pkg/injection"
 )
 
-var Get = frogbinding.Get
+var Get = servicebinding.Get
 
 func init() {
 	injection.Fake.RegisterInformer(withInformer)
@@ -35,6 +35,6 @@ func init() {
 
 func withInformer(ctx context.Context) (context.Context, controller.Informer) {
 	f := fake.Get(ctx)
-	inf := f.Bindings().V1alpha1().FrogBindings()
-	return context.WithValue(ctx, frogbinding.Key{}, inf), inf.Informer()
+	inf := f.Bindings().V1alpha1().ServiceBindings()
+	return context.WithValue(ctx, servicebinding.Key{}, inf), inf.Informer()
 }

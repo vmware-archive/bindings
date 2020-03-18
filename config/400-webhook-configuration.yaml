@@ -67,7 +67,7 @@ webhooks:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration
 metadata:
-  name: frogbindings.webhook.bindings.projectriff.io
+  name: servicebindings.webhook.bindings.projectriff.io
   labels:
     bindings.projectriff.io/release: devel
 webhooks:
@@ -78,7 +78,7 @@ webhooks:
       name: webhook
       namespace: binding-system
   failurePolicy: Fail
-  name: frogbindings.webhook.bindings.projectriff.io
+  name: servicebindings.webhook.bindings.projectriff.io
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: MutatingWebhookConfiguration

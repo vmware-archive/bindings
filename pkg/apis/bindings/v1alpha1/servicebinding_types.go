@@ -16,78 +16,78 @@ import (
 )
 
 const (
-	FrogBindingAnnotationKey = GroupName + "/frog-binding"
+	ServiceBindingAnnotationKey = GroupName + "/service-binding"
 )
 
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type FrogBinding struct {
+type ServiceBinding struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   FrogBindingSpec   `json:"spec,omitempty"`
-	Status FrogBindingStatus `json:"status,omitempty"`
+	Spec   ServiceBindingSpec   `json:"spec,omitempty"`
+	Status ServiceBindingStatus `json:"status,omitempty"`
 }
 
 var (
-	// Check that FrogBinding can be validated and defaulted.
-	_ apis.Validatable   = (*FrogBinding)(nil)
-	_ apis.Defaultable   = (*FrogBinding)(nil)
-	_ kmeta.OwnerRefable = (*FrogBinding)(nil)
+	// Check that ServiceBinding can be validated and defaulted.
+	_ apis.Validatable   = (*ServiceBinding)(nil)
+	_ apis.Defaultable   = (*ServiceBinding)(nil)
+	_ kmeta.OwnerRefable = (*ServiceBinding)(nil)
 
 	// Check is Bindable
-	_ psbinding.Bindable  = (*FrogBinding)(nil)
-	_ duck.BindableStatus = (*FrogBindingStatus)(nil)
+	_ psbinding.Bindable  = (*ServiceBinding)(nil)
+	_ duck.BindableStatus = (*ServiceBindingStatus)(nil)
 )
 
-type FrogBindingSpec struct {
-	Subject   *tracker.Reference `json:"subject,omitempty"`
-	Providers []FrogProvider     `json:"providers,omitempty"`
+type ServiceBindingSpec struct {
+	Subject   *tracker.Reference          `json:"subject,omitempty"`
+	Providers []ServiceCredentialProvider `json:"providers,omitempty"`
 }
 
-// FrogProvider represents a single logical binding to inject into the subject
-type FrogProvider struct {
+// ServiceCredentialProvider represents a single logical binding to inject into the subject
+type ServiceCredentialProvider struct {
 	// TODO switch to using remote references
 	// Ref           *tracker.Reference `json:"ref, omitempty"`
 	// Ref holds names for the metadata and secret
-	Ref           FrogReference   `json:"ref,omitempty"`
+	Ref ServiceCredentialReference `json:"ref,omitempty"`
 	// Name within the CNB_BINDINGS directory to mount the metadata and secrets
-	Name          string          `json:"name"`
+	Name string `json:"name"`
 	// ContainerName targets a specific container within the subject to inject
 	// into. If not set, all container will be injected
-	ContainerName string          `json:"containerName,omitempty"`
+	ContainerName string `json:"containerName,omitempty"`
 	// BindingMode restricts which aspects of the provisioned binding are
 	// exposed to the subject:
-	// - Metadata: mounts only the metadata 
+	// - Metadata: mounts only the metadata
 	// - Secret: mounts the metadata and secret
-	BindingMode   FrogBindingMode `json:"bindingMode,omitempty"`
+	BindingMode ServiceBindingMode `json:"bindingMode,omitempty"`
 }
 
-type FrogReference struct {
+type ServiceCredentialReference struct {
 	Metadata corev1.LocalObjectReference `json:"metadata"`
 	Secret   corev1.LocalObjectReference `json:"secret"`
 }
 
-type FrogBindingMode string
+type ServiceBindingMode string
 
 const (
-	MetadataFrogBinding FrogBindingMode = "Metadata"
-	SecretFrogBinding   FrogBindingMode = "Secret"
+	MetadataServiceBinding ServiceBindingMode = "Metadata"
+	SecretServiceBinding   ServiceBindingMode = "Secret"
 )
 
-type FrogBindingStatus struct {
+type ServiceBindingStatus struct {
 	duckv1beta1.Status `json:",inline"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type FrogBindingList struct {
+type ServiceBindingList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []FrogBinding `json:"items"`
+	Items           []ServiceBinding `json:"items"`
 }
 
-func (b *FrogBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
+func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	b.Spec.Subject.Validate(ctx)
 	if b.Spec.Subject.Namespace != b.Namespace {
 		errs = errs.Also(
@@ -110,12 +110,12 @@ func (b *FrogBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 				apis.ErrMissingField("ref.metadata.name").ViaFieldIndex("spec.providers", i),
 			)
 		}
-		if p.Ref.Secret.Name == "" && p.BindingMode == SecretFrogBinding {
+		if p.Ref.Secret.Name == "" && p.BindingMode == SecretServiceBinding {
 			errs = errs.Also(
 				apis.ErrMissingField("ref.secret.name").ViaFieldIndex("spec.providers", i),
 			)
 		}
-		if p.BindingMode != MetadataFrogBinding && p.BindingMode != SecretFrogBinding {
+		if p.BindingMode != MetadataServiceBinding && p.BindingMode != SecretServiceBinding {
 			errs = errs.Also(
 				apis.ErrInvalidValue(p.BindingMode, "bindingMode").ViaFieldIndex("spec.providers", i),
 			)
@@ -125,18 +125,18 @@ func (b *FrogBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	return errs
 }
 
-func (b *FrogBinding) SetDefaults(context.Context) {
+func (b *ServiceBinding) SetDefaults(context.Context) {
 	if b.Spec.Subject.Namespace == "" {
 		// Default the subject's namespace to our namespace.
 		b.Spec.Subject.Namespace = b.Namespace
 	}
 	for i, p := range b.Spec.Providers {
 		if p.BindingMode == "" {
-			b.Spec.Providers[i].BindingMode = SecretFrogBinding
+			b.Spec.Providers[i].BindingMode = SecretServiceBinding
 		}
 	}
 }
 
-func (b *FrogBinding) GetGroupVersionKind() schema.GroupVersionKind {
-	return SchemeGroupVersion.WithKind("FrogBinding")
+func (b *ServiceBinding) GetGroupVersionKind() schema.GroupVersionKind {
+	return SchemeGroupVersion.WithKind("ServiceBinding")
 }

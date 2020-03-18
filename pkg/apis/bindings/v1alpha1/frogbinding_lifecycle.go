@@ -97,8 +97,7 @@ func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1
 	}
 	if mountPath == "" {
 		// default mount path
-		// TODO is there a better default path?
-		mountPath = "/var/bindings"
+		mountPath = "/platform/bindings"
 		c.Env = append(c.Env, corev1.EnvVar{
 			Name:  "CNB_BINDINGS",
 			Value: mountPath,
@@ -127,7 +126,6 @@ func (b *FrogBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1
 		})
 	}
 }
-
 
 func (b *FrogBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 	if ps.Annotations == nil {

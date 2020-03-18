@@ -22,6 +22,7 @@ import (
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
@@ -40,7 +41,8 @@ import (
 )
 
 var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"): &v1alpha1.ImageBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):   &v1alpha1.ImageBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &v1alpha1.ServiceBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
@@ -143,5 +145,6 @@ func main() {
 
 		// For each binding we have a controller and a binding webhook.
 		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, nop),
+		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nop),
 	)
 }

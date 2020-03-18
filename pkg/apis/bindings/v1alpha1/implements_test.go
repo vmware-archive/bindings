@@ -24,6 +24,9 @@ import (
 )
 
 func TestImplementsBinding(t *testing.T) {
+	if err := duck.VerifyType(&ServiceBinding{}, &duckv1alpha1.Binding{}); err != nil {
+		t.Fatal(err)
+	}
 	if err := duck.VerifyType(&ImageBinding{}, &duckv1alpha1.Binding{}); err != nil {
 		t.Fatal(err)
 	}

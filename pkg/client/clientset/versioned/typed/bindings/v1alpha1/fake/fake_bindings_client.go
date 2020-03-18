@@ -32,6 +32,10 @@ func (c *FakeBindingsV1alpha1) ImageBindings(namespace string) v1alpha1.ImageBin
 	return &FakeImageBindings{c, namespace}
 }
 
+func (c *FakeBindingsV1alpha1) ServiceBindings(namespace string) v1alpha1.ServiceBindingInterface {
+	return &FakeServiceBindings{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeBindingsV1alpha1) RESTClient() rest.Interface {

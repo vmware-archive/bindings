@@ -1,0 +1,42 @@
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: ServiceBinding
+metadata:
+  name: test-binding
+spec:
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: test-deployment
+  providers:
+    - name: mysql
+      containerName: test-container
+      ref:
+        metadata:
+          name: mysql-binding
+        secret:
+          name: mysql-binding
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-binding
+data:
+  kind: mysql
+  provider: test
+  tags: ""
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-binding
+type: Opaque
+stringData:
+  hostname: localhost
+  jdbcUrl: jdbc:mysql://localhost:3306/default?user=root&password=
+  name: default
+  password: ""
+  port: "3306"
+  uri: mysql://root:@localhost:3306/default?reconnect=true
+  username: root

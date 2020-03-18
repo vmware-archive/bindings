@@ -55,6 +55,8 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=bindings.projectriff.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("imagebindings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().ImageBindings().Informer()}, nil
+	case v1alpha1.SchemeGroupVersion.WithResource("servicebindings"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().ServiceBindings().Informer()}, nil
 
 	}
 

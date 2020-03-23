@@ -19,9 +19,6 @@ package imagebinding
 import (
 	"context"
 
-	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	imginformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/imagebinding"
-	"github.com/projectriff/bindings/pkg/resolver"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -35,6 +32,10 @@ import (
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/tracker"
 	"knative.dev/pkg/webhook/psbinding"
+
+	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	imginformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/imagebinding"
+	"github.com/projectriff/bindings/pkg/resolver"
 )
 
 const (
@@ -65,15 +66,11 @@ func NewController(
 	r := resolver.NewLatestImageResolver(ctx, impl.EnqueueKey)
 	c.WithContext = func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
 		sb := b.(*v1alpha1.ImageBinding)
-		images := map[string]string{}
-		for _, p := range sb.Spec.Providers {
-			latestImage, err := r.LatestImageFromObjectReference(sb.Spec.Providers[0].ImageableRef, sb)
-			if err != nil {
-				return nil, err
-			}
-			images[p.ContainerName] = latestImage
+		img, err := r.LatestImageFromObjectReference(sb.Spec.Provider, sb)
+		if err != nil {
+			return nil, err
 		}
-		return v1alpha1.WithImages(ctx, images), nil
+		return v1alpha1.WithLatestImage(ctx, img), nil
 	}
 
 	logger.Info("Setting up event handlers")

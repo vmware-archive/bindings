@@ -4,21 +4,21 @@ import (
 	"context"
 )
 
-// bindImagesKey is used as the key for associating information
+// bindLatestImageKey is used as the key for associating information
 // with a context.Context.
-type bindImagesKey struct{}
+type bindLatestImageKey struct{}
 
-// WithImages notes on the context for binding that the resolved images
-func WithImages(ctx context.Context, images map[string]string) context.Context {
-	return context.WithValue(ctx, bindImagesKey{}, images)
+// WithLatestImage notes the resolved image on the context for binding
+func WithLatestImage(ctx context.Context, img string) context.Context {
+	return context.WithValue(ctx, bindLatestImageKey{}, img)
 }
 
-// GetImages accesses the resolved images that have been associated
+// GetLatestImage accesses the resolved image that have been associated
 // with this context.
-func GetImages(ctx context.Context) map[string]string {
-	value := ctx.Value(bindImagesKey{})
+func GetLatestImage(ctx context.Context) string {
+	value := ctx.Value(bindLatestImageKey{})
 	if value == nil {
-		return nil
+		return ""
 	}
-	return value.(map[string]string)
+	return value.(string)
 }

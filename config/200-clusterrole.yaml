@@ -88,3 +88,17 @@ rules:
   - apiGroups: ["build.pivotal.io"]
     resources: ["images"]
     verbs: ["get", "list", "patch", "watch"]
+---
+# This piece of the aggregated cluster role enables us to read
+# riff build resources
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: binding-system-riff
+  labels:
+    bindings.projectriff.io/release: devel
+    bindings.projectriff.io/controller: "true"
+rules:
+  - apiGroups: ["build.projectriff.io"]
+    resources: ["applications", "containers", "functions"]
+    verbs: ["get", "list", "patch", "watch"]

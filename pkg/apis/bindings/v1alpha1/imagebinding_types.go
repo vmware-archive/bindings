@@ -13,10 +13,6 @@ import (
 	"knative.dev/pkg/webhook/psbinding"
 )
 
-const (
-	ImageBindingAnnotationKey = GroupName + "/image-binding"
-)
-
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type ImageBinding struct {
@@ -39,12 +35,8 @@ var (
 )
 
 type ImageBindingSpec struct {
-	Subject   *tracker.Reference `json:"subject,omitempty"`
-	Providers []ImageProvider    `json:"providers,omitempty"`
-}
-
-type ImageProvider struct {
-	ImageableRef  *tracker.Reference `json:"imageableRef, omitempty"`
+	Subject       *tracker.Reference `json:"subject,omitempty"`
+	Provider      *tracker.Reference `json:"provider,omitempty"`
 	ContainerName string             `json:"containerName,omitempty"`
 }
 
@@ -60,18 +52,16 @@ type ImageBindingList struct {
 	Items           []ImageBinding `json:"items"`
 }
 
-func (b *ImageBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
+func (b *ImageBinding) Validate(context.Context) (errs *apis.FieldError) {
 	if b.Spec.Subject.Namespace != b.Namespace {
 		errs = errs.Also(
 			apis.ErrInvalidValue(b.Spec.Subject.Namespace, "spec.subject.namespace"),
 		)
 	}
-	for i, p := range b.Spec.Providers {
-		if p.ImageableRef.Namespace != b.Namespace {
-			errs = errs.Also(
-				apis.ErrInvalidValue(p.ImageableRef.Namespace, "imageableRef.namespace").ViaFieldIndex("spec.providers", i),
-			)
-		}
+	if b.Spec.Provider.Namespace != b.Namespace {
+		errs = errs.Also(
+			apis.ErrInvalidValue(b.Spec.Provider.Namespace, "spec.provider.namespace"),
+		)
 	}
 
 	return errs
@@ -82,10 +72,9 @@ func (b *ImageBinding) SetDefaults(context.Context) {
 		// Default the subject's namespace to our namespace.
 		b.Spec.Subject.Namespace = b.Namespace
 	}
-	for i, p := range b.Spec.Providers {
-		if p.ImageableRef.Namespace == "" {
-			b.Spec.Providers[i].ImageableRef.Namespace = b.Namespace
-		}
+	if b.Spec.Provider.Namespace == "" {
+		// Default the provider's namespace to our namespace.
+		b.Spec.Provider.Namespace = b.Namespace
 	}
 }
 

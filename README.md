@@ -10,34 +10,27 @@ kind: ImageBinding
 metadata:
   name: test-binding
 spec:
+  containerName: ""
+  provider:
+    apiVersion: ""
+    kind: ""
+    name: ""
   subject:
     apiVersion: ""
     kind: ""
     name: ""
-    namespace: ""
-
-  providers:
-    - containerName: ""
-      imageableRef:
-        apiVersion: ""
-        kind: ""
-        name: ""
-        namespace: ""
 ```
 
 The ImageBinding resource must be configured in the following way:
+* `containerName`: name of container within the subject's pod spec to update with image from the provider
+* `provider`: a reference to an `Imageable` resource
+    * `apiVersion`: resource API Version
+    * `kind`: resource kind
+    * `name`: resource name
 * `subject`: a reference to a `PodSpecable` resource
     * `apiVersion`: resource API Version
     * `kind`: resource kind
     * `name`: resource name
-    * `namespace`: resource namespace (defaults to namespace of the `ImageBinding`)
-* `providers`
-    * `containerName`: name of container within the subject's pod spec to update with image from `imageableRef`
-    * `imageableRef`: a reference to an `Imageable` resource
-        * `apiVersion`: resource API Version
-        * `kind`: resource kind
-        * `name`: resource name
-        * `namespace`: resource namespace (defaults to namespace of the `ImageBinding`)
 
 
 ## Imageable

@@ -19,10 +19,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 
-	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
-	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
@@ -38,6 +37,32 @@ import (
 	"knative.dev/pkg/webhook/resourcesemantics"
 	"knative.dev/pkg/webhook/resourcesemantics/defaulting"
 	"knative.dev/pkg/webhook/resourcesemantics/validation"
+
+	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
+)
+
+var (
+	//BindingExcludeLabel can be applied to exclude resource from webhook
+	BindingExcludeLabel = "bindings.projectriff.dev/exclude"
+	//BindingINcludeLabel can be applied to include resource in webhook
+	BindingIncludeLabel = "bindings.projectriff.dev/include"
+
+	ExclusionSelector = metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{{
+			Key:      BindingExcludeLabel,
+			Operator: metav1.LabelSelectorOpNotIn,
+			Values:   []string{"true"},
+		}},
+	}
+	InclusionSelector = metav1.LabelSelector{
+		MatchExpressions: []metav1.LabelSelectorRequirement{{
+			Key:      BindingIncludeLabel,
+			Operator: metav1.LabelSelectorOpIn,
+			Values:   []string{"true"},
+		}},
+	}
 )
 
 var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
@@ -105,6 +130,10 @@ func NewConfigValidationController(ctx context.Context, cmw configmap.Watcher) *
 }
 
 func NewBindingWebhook(resource string, gla psbinding.GetListAll, wc psbinding.BindableContext) injection.ControllerConstructor {
+	selector := psbinding.WithSelector(ExclusionSelector)
+	if os.Getenv("BINDING_SELECTION_MODE") == "inclusion" {
+		selector = psbinding.WithSelector(InclusionSelector)
+	}
 	return func(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
 		return psbinding.NewAdmissionController(ctx,
 			// Name of the resource webhook.
@@ -118,6 +147,7 @@ func NewBindingWebhook(resource string, gla psbinding.GetListAll, wc psbinding.B
 
 			// How to setup the context prior to invoking Do/Undo.
 			wc,
+			selector,
 		)
 	}
 }

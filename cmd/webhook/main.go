@@ -44,10 +44,12 @@ import (
 )
 
 var (
+
+	WebhookName = "bindings-webhook"
 	//BindingExcludeLabel can be applied to exclude resource from webhook
-	BindingExcludeLabel = "bindings.projectriff.dev/exclude"
+	BindingExcludeLabel = "bindings.projectriff.io/exclude"
 	//BindingINcludeLabel can be applied to include resource in webhook
-	BindingIncludeLabel = "bindings.projectriff.dev/include"
+	BindingIncludeLabel = "bindings.projectriff.io/include"
 
 	ExclusionSelector = metav1.LabelSelector{
 		MatchExpressions: []metav1.LabelSelectorRequirement{{
@@ -164,7 +166,7 @@ func main() {
 		return ctx, nil
 	}
 
-	sharedmain.MainWithContext(ctx, "webhook",
+	sharedmain.WebhookMainWithContext(ctx, WebhookName,
 		// Our singleton certificate controller.
 		certificates.NewController,
 

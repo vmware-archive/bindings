@@ -23,6 +23,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/injection"
@@ -67,7 +68,7 @@ var (
 	}
 )
 
-var types = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
+var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
 	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):   &v1alpha1.ImageBinding{},
 	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &v1alpha1.ServiceBinding{},
 }
@@ -81,7 +82,7 @@ func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher
 		"/defaulting",
 
 		// The resources to validate and default.
-		types,
+		ourTypes,
 
 		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
 		func(ctx context.Context) context.Context {
@@ -102,7 +103,7 @@ func NewValidationAdmissionController(ctx context.Context, cmw configmap.Watcher
 		"/validation",
 
 		// The resources to validate and default.
-		types,
+		ourTypes,
 
 		// A function that infuses the context passed to Validate/SetDefaults with custom metadata.
 		func(ctx context.Context) context.Context {
@@ -131,12 +132,13 @@ func NewConfigValidationController(ctx context.Context, cmw configmap.Watcher) *
 	)
 }
 
-func NewBindingWebhook(resource string, gla psbinding.GetListAll, wc psbinding.BindableContext) injection.ControllerConstructor {
+func NewBindingWebhook(resource string, gla psbinding.GetListAll, wcf WithContextFactory) injection.ControllerConstructor {
 	selector := psbinding.WithSelector(ExclusionSelector)
 	if os.Getenv("BINDING_SELECTION_MODE") == "inclusion" {
 		selector = psbinding.WithSelector(InclusionSelector)
 	}
 	return func(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
+		wc := wcf(ctx, func(types.NamespacedName) {})
 		return psbinding.NewAdmissionController(ctx,
 			// Name of the resource webhook.
 			fmt.Sprintf("%s.webhook.bindings.projectriff.io", resource),
@@ -162,8 +164,10 @@ func main() {
 		SecretName:  "webhook-certs",
 	})
 
-	nop := func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
-		return ctx, nil
+	nop := func(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext {
+		return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
+			return ctx, nil
+		}
 	}
 
 	sharedmain.WebhookMainWithContext(ctx, WebhookName,
@@ -176,7 +180,13 @@ func main() {
 		NewConfigValidationController,
 
 		// For each binding we have a controller and a binding webhook.
-		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, nop),
+		imagebinding.NewController, NewBindingWebhook(
+			"imagebindings",
+			imagebinding.ListAll,
+			imagebinding.WithContextFactory,
+		),
 		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nop),
 	)
 }
+
+type WithContextFactory func(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext

@@ -19,7 +19,7 @@ limitations under the License.
 package servicebinding
 
 import (
-	"context"
+	context "context"
 
 	v1alpha1 "github.com/projectriff/bindings/pkg/client/informers/externalversions/bindings/v1alpha1"
 	factory "github.com/projectriff/bindings/pkg/client/injection/informers/factory"

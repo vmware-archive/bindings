@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	"context"
+	context "context"
 
 	servicebinding "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
 	fake "github.com/projectriff/bindings/pkg/client/injection/informers/factory/fake"

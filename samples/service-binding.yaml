@@ -1,20 +1,29 @@
 apiVersion: bindings.projectriff.io/v1alpha1
 kind: ServiceBinding
 metadata:
-  name: test-binding
+  name: mysql
 spec:
   subject:
     apiVersion: apps/v1
     kind: Deployment
     name: test-deployment
-  providers:
-    - name: mysql
-      containerName: test-container
-      ref:
-        metadata:
-          name: mysql-binding
-        secret:
-          name: mysql-binding
+  binding:
+    metadata:
+      name: mysql-binding
+    secret:
+      name: mysql-binding
+
+---
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: BindableService
+metadata:
+  name: mysql
+spec:
+  binding:
+    metadata:
+      name: mysql-binding
+    secret:
+      name: mysql-binding
 
 ---
 apiVersion: v1

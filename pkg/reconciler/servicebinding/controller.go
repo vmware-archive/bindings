@@ -21,8 +21,10 @@ import (
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
 	serviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
+	"github.com/projectriff/bindings/pkg/resolver"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -61,6 +63,7 @@ func NewController(
 	}
 
 	impl := controller.NewImpl(c, logger, "ServiceBindings")
+	c.WithContext = WithContextFactory(ctx, impl.EnqueueKey)
 
 	logger.Info("Setting up event handlers")
 
@@ -92,5 +95,17 @@ func ListAll(ctx context.Context, handler cache.ResourceEventHandler) psbinding.
 			bl = append(bl, elt)
 		}
 		return bl, nil
+	}
+}
+
+func WithContextFactory(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext {
+	r := resolver.NewServiceableResolver(ctx, handler)
+	return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
+		sb := b.(*v1alpha1.ServiceBinding)
+		serviceableBinding, err := r.ServiceableFromObjectReference(sb.Spec.Provider, sb)
+		if err != nil {
+			return nil, err
+		}
+		return v1alpha1.WithServiceableBinding(ctx, serviceableBinding), nil
 	}
 }

@@ -165,12 +165,6 @@ func main() {
 		SecretName:  "webhook-certs",
 	})
 
-	nop := func(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext {
-		return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
-			return ctx, nil
-		}
-	}
-
 	sharedmain.WebhookMainWithContext(ctx, WebhookName,
 		// Our singleton certificate controller.
 		certificates.NewController,
@@ -187,7 +181,7 @@ func main() {
 
 		// For each binding we also have a binding webhook.
 		NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
-		NewBindingWebhook("servicebindings", servicebinding.ListAll, nop),
+		NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
 	)
 }
 

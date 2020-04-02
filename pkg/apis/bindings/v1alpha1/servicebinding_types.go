@@ -3,7 +3,6 @@ package v1alpha1
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
@@ -42,8 +41,8 @@ var (
 type ServiceBindingSpec struct {
 	// Subject resource to bind into
 	Subject *tracker.Reference `json:"subject,omitempty"`
-	// Bining reference to the binding metadata and secret
-	Binding ServiceCredentialReference `json:"binding,omitempty"`
+	// Provider resoufce container the binding metadata and secret
+	Provider *tracker.Reference `json:"provider,omitempty"`
 	// ContainerName targets a specific container within the subject to inject
 	// into. If not set, all container will be injected
 	ContainerName string `json:"containerName,omitempty"`
@@ -52,11 +51,6 @@ type ServiceBindingSpec struct {
 	// - Metadata: mounts only the metadata
 	// - Secret: mounts the metadata and secret
 	BindingMode ServiceBindingMode `json:"bindingMode,omitempty"`
-}
-
-type ServiceCredentialReference struct {
-	Metadata corev1.LocalObjectReference `json:"metadata"`
-	Secret   corev1.LocalObjectReference `json:"secret"`
 }
 
 type ServiceBindingMode string
@@ -79,20 +73,25 @@ type ServiceBindingList struct {
 }
 
 func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
-	b.Spec.Subject.Validate(ctx)
+	errs = errs.Also(
+		b.Spec.Subject.Validate(ctx).ViaField("spec.subject"),
+	)
 	if b.Spec.Subject.Namespace != b.Namespace {
 		errs = errs.Also(
 			apis.ErrInvalidValue(b.Spec.Subject.Namespace, "spec.subject.namespace"),
 		)
 	}
-	if b.Spec.Binding.Metadata.Name == "" {
+	errs = errs.Also(
+		b.Spec.Provider.Validate(ctx).ViaField("spec.provider"),
+	)
+	if b.Spec.Provider.Namespace != b.Namespace {
 		errs = errs.Also(
-			apis.ErrMissingField("spec.binding.metadata.name"),
+			apis.ErrInvalidValue(b.Spec.Provider.Namespace, "spec.provider.namespace"),
 		)
 	}
-	if b.Spec.Binding.Secret.Name == "" && b.Spec.BindingMode == SecretServiceBinding {
+	if b.Spec.Provider.Name == "" {
 		errs = errs.Also(
-			apis.ErrMissingField("spec.binding.secret.name"),
+			apis.ErrMissingField("spec.provider.name"),
 		)
 	}
 	if b.Spec.BindingMode != MetadataServiceBinding && b.Spec.BindingMode != SecretServiceBinding {
@@ -108,6 +107,10 @@ func (b *ServiceBinding) SetDefaults(context.Context) {
 	if b.Spec.Subject.Namespace == "" {
 		// Default the subject's namespace to our namespace.
 		b.Spec.Subject.Namespace = b.Namespace
+	}
+	if b.Spec.Provider.Namespace == "" {
+		// Default the provider's namespace to our namespace.
+		b.Spec.Provider.Namespace = b.Namespace
 	}
 	if b.Spec.BindingMode == "" {
 		b.Spec.BindingMode = SecretServiceBinding

@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 
+	iduckv1alpha1 "github.com/projectriff/bindings/pkg/apis/duck/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
@@ -33,12 +34,12 @@ var (
 )
 
 type BindableServiceSpec struct {
-	Binding ServiceCredentialReference `json:"binding,omitempty"`
+	Binding iduckv1alpha1.ServiceableBinding `json:"binding,omitempty"`
 }
 
 type BindableServiceStatus struct {
 	duckv1beta1.Status `json:",inline"`
-	Binding            ServiceCredentialReference `json:"binding,omitempty"`
+	Binding            iduckv1alpha1.ServiceableBinding `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

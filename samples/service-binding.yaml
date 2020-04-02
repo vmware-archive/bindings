@@ -7,11 +7,10 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: test-deployment
-  binding:
-    metadata:
-      name: mysql-binding
-    secret:
-      name: mysql-binding
+  provider:
+    apiVersion: bindings.projectriff.io/v1alpha1
+    kind: BindableService
+    name: mysql
 
 ---
 apiVersion: bindings.projectriff.io/v1alpha1

@@ -40,16 +40,20 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	}
 
 	newVolumes := sets.NewString()
+	sb := GetServiceableBinding(ctx)
+	if sb == nil {
+		return
+	}
 	// TODO ensure unique volume names
 	// TODO limit volume name length
-	metadataVolume := fmt.Sprintf("%s-metadata", b.Spec.Binding.Metadata.Name)
-	secretVolume := fmt.Sprintf("%s-secret", b.Spec.Binding.Secret.Name)
+	metadataVolume := fmt.Sprintf("%s-metadata", sb.Metadata.Name)
+	secretVolume := fmt.Sprintf("%s-secret", sb.Secret.Name)
 	if !existingVolumes.Has(metadataVolume) {
 		ps.Spec.Template.Spec.Volumes = append(ps.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: metadataVolume,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: b.Spec.Binding.Metadata,
+					LocalObjectReference: sb.Metadata,
 				},
 			},
 		})
@@ -61,7 +65,7 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 			Name: secretVolume,
 			VolumeSource: corev1.VolumeSource{
 				Secret: &corev1.SecretVolumeSource{
-					SecretName: b.Spec.Binding.Secret.Name,
+					SecretName: sb.Secret.Name,
 				},
 			},
 		})

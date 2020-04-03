@@ -19,7 +19,7 @@ limitations under the License.
 package imageable
 
 import (
-	"context"
+	context "context"
 
 	v1alpha1 "github.com/projectriff/bindings/pkg/apis/duck/v1alpha1"
 	duck "knative.dev/pkg/apis/duck"

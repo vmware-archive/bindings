@@ -28,6 +28,10 @@ type FakeBindingsV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeBindingsV1alpha1) BindableServices(namespace string) v1alpha1.BindableServiceInterface {
+	return &FakeBindableServices{c, namespace}
+}
+
 func (c *FakeBindingsV1alpha1) ImageBindings(namespace string) v1alpha1.ImageBindingInterface {
 	return &FakeImageBindings{c, namespace}
 }

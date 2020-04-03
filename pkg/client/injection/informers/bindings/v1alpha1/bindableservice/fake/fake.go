@@ -21,13 +21,13 @@ package fake
 import (
 	context "context"
 
-	imagebinding "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/imagebinding"
+	bindableservice "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/bindableservice"
 	fake "github.com/projectriff/bindings/pkg/client/injection/informers/factory/fake"
 	controller "knative.dev/pkg/controller"
 	injection "knative.dev/pkg/injection"
 )
 
-var Get = imagebinding.Get
+var Get = bindableservice.Get
 
 func init() {
 	injection.Fake.RegisterInformer(withInformer)
@@ -35,6 +35,6 @@ func init() {
 
 func withInformer(ctx context.Context) (context.Context, controller.Informer) {
 	f := fake.Get(ctx)
-	inf := f.Bindings().V1alpha1().ImageBindings()
-	return context.WithValue(ctx, imagebinding.Key{}, inf), inf.Informer()
+	inf := f.Bindings().V1alpha1().BindableServices()
+	return context.WithValue(ctx, bindableservice.Key{}, inf), inf.Informer()
 }

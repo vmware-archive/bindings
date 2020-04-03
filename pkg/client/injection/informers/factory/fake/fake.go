@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	"context"
+	context "context"
 
 	externalversions "github.com/projectriff/bindings/pkg/client/informers/externalversions"
 	fake "github.com/projectriff/bindings/pkg/client/injection/client/fake"

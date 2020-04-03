@@ -40,12 +40,12 @@ import (
 	"knative.dev/pkg/webhook/resourcesemantics/validation"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	"github.com/projectriff/bindings/pkg/reconciler/bindableservice"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
 	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
 )
 
 var (
-
 	WebhookName = "bindings-webhook"
 	//BindingExcludeLabel can be applied to exclude resource from webhook
 	BindingExcludeLabel = "bindings.projectriff.io/exclude"
@@ -69,8 +69,9 @@ var (
 )
 
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):   &v1alpha1.ImageBinding{},
-	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &v1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("BindableService"): &v1alpha1.BindableService{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):    &v1alpha1.ImageBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):  &v1alpha1.ServiceBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
@@ -164,12 +165,6 @@ func main() {
 		SecretName:  "webhook-certs",
 	})
 
-	nop := func(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext {
-		return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
-			return ctx, nil
-		}
-	}
-
 	sharedmain.WebhookMainWithContext(ctx, WebhookName,
 		// Our singleton certificate controller.
 		certificates.NewController,
@@ -179,13 +174,14 @@ func main() {
 		NewValidationAdmissionController,
 		NewConfigValidationController,
 
-		// For each binding we have a controller and a binding webhook.
-		imagebinding.NewController, NewBindingWebhook(
-			"imagebindings",
-			imagebinding.ListAll,
-			imagebinding.WithContextFactory,
-		),
-		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nop),
+		// For each resource we have a controller.
+		bindableservice.NewController,
+		imagebinding.NewController,
+		servicebinding.NewController,
+
+		// For each binding we also have a binding webhook.
+		NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
+		NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
 	)
 }
 

@@ -3,8 +3,6 @@ package v1alpha1
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
@@ -41,18 +39,10 @@ var (
 )
 
 type ServiceBindingSpec struct {
-	Subject   *tracker.Reference          `json:"subject,omitempty"`
-	Providers []ServiceCredentialProvider `json:"providers,omitempty"`
-}
-
-// ServiceCredentialProvider represents a single logical binding to inject into the subject
-type ServiceCredentialProvider struct {
-	// TODO switch to using remote references
-	// Ref           *tracker.Reference `json:"ref, omitempty"`
-	// Ref holds names for the metadata and secret
-	Ref ServiceCredentialReference `json:"ref,omitempty"`
-	// Name within the CNB_BINDINGS directory to mount the metadata and secrets
-	Name string `json:"name"`
+	// Subject resource to bind into
+	Subject *tracker.Reference `json:"subject,omitempty"`
+	// Provider resoufce container the binding metadata and secret
+	Provider *tracker.Reference `json:"provider,omitempty"`
 	// ContainerName targets a specific container within the subject to inject
 	// into. If not set, all container will be injected
 	ContainerName string `json:"containerName,omitempty"`
@@ -61,11 +51,6 @@ type ServiceCredentialProvider struct {
 	// - Metadata: mounts only the metadata
 	// - Secret: mounts the metadata and secret
 	BindingMode ServiceBindingMode `json:"bindingMode,omitempty"`
-}
-
-type ServiceCredentialReference struct {
-	Metadata corev1.LocalObjectReference `json:"metadata"`
-	Secret   corev1.LocalObjectReference `json:"secret"`
 }
 
 type ServiceBindingMode string
@@ -88,38 +73,31 @@ type ServiceBindingList struct {
 }
 
 func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
-	b.Spec.Subject.Validate(ctx)
+	errs = errs.Also(
+		b.Spec.Subject.Validate(ctx).ViaField("spec.subject"),
+	)
 	if b.Spec.Subject.Namespace != b.Namespace {
 		errs = errs.Also(
 			apis.ErrInvalidValue(b.Spec.Subject.Namespace, "spec.subject.namespace"),
 		)
 	}
-	for i, p := range b.Spec.Providers {
-		if p.Name == "" {
-			// TODO force uniqueness between providers
-			errs = errs.Also(
-				apis.ErrMissingField("name").ViaFieldIndex("spec.providers", i),
-			)
-		} else if out := validation.NameIsDNSLabel(p.Name, false); len(out) != 0 {
-			errs = errs.Also(
-				apis.ErrInvalidValue(p.Name, "name").ViaFieldIndex("spec.providers", i),
-			)
-		}
-		if p.Ref.Metadata.Name == "" {
-			errs = errs.Also(
-				apis.ErrMissingField("ref.metadata.name").ViaFieldIndex("spec.providers", i),
-			)
-		}
-		if p.Ref.Secret.Name == "" && p.BindingMode == SecretServiceBinding {
-			errs = errs.Also(
-				apis.ErrMissingField("ref.secret.name").ViaFieldIndex("spec.providers", i),
-			)
-		}
-		if p.BindingMode != MetadataServiceBinding && p.BindingMode != SecretServiceBinding {
-			errs = errs.Also(
-				apis.ErrInvalidValue(p.BindingMode, "bindingMode").ViaFieldIndex("spec.providers", i),
-			)
-		}
+	errs = errs.Also(
+		b.Spec.Provider.Validate(ctx).ViaField("spec.provider"),
+	)
+	if b.Spec.Provider.Namespace != b.Namespace {
+		errs = errs.Also(
+			apis.ErrInvalidValue(b.Spec.Provider.Namespace, "spec.provider.namespace"),
+		)
+	}
+	if b.Spec.Provider.Name == "" {
+		errs = errs.Also(
+			apis.ErrMissingField("spec.provider.name"),
+		)
+	}
+	if b.Spec.BindingMode != MetadataServiceBinding && b.Spec.BindingMode != SecretServiceBinding {
+		errs = errs.Also(
+			apis.ErrInvalidValue(b.Spec.BindingMode, "spec.bindingMode"),
+		)
 	}
 
 	return errs
@@ -130,10 +108,12 @@ func (b *ServiceBinding) SetDefaults(context.Context) {
 		// Default the subject's namespace to our namespace.
 		b.Spec.Subject.Namespace = b.Namespace
 	}
-	for i, p := range b.Spec.Providers {
-		if p.BindingMode == "" {
-			b.Spec.Providers[i].BindingMode = SecretServiceBinding
-		}
+	if b.Spec.Provider.Namespace == "" {
+		// Default the provider's namespace to our namespace.
+		b.Spec.Provider.Namespace = b.Namespace
+	}
+	if b.Spec.BindingMode == "" {
+		b.Spec.BindingMode = SecretServiceBinding
 	}
 }
 

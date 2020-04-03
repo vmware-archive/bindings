@@ -53,6 +53,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=bindings.projectriff.io, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("bindableservices"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().BindableServices().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("imagebindings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().ImageBindings().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("servicebindings"):

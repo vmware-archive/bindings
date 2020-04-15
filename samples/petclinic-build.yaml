@@ -1,0 +1,27 @@
+---
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: ImageBinding
+metadata:
+  name: petclinic
+spec:
+  containerName: application
+  provider:
+    apiVersion: build.projectriff.io/v1alpha1
+    kind: Application
+    name: petclinic
+  subject:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: petclinic
+
+---
+apiVersion: build.projectriff.io/v1alpha1
+kind: Application
+metadata:
+  name: petclinic
+spec:
+  cacheSize: 1Gi
+  source:
+    git:
+      revision: sb-2.3.x
+      url: https://github.com/spring-projects/spring-petclinic

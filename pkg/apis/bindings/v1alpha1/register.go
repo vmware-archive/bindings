@@ -55,6 +55,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ImageBindingList{},
 		&ServiceBinding{},
 		&ServiceBindingList{},
+		&SpringBootContainer{},
+		&SpringBootContainerList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

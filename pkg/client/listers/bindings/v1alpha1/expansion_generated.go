@@ -41,3 +41,11 @@ type ServiceBindingListerExpansion interface{}
 // ServiceBindingNamespaceListerExpansion allows custom methods to be added to
 // ServiceBindingNamespaceLister.
 type ServiceBindingNamespaceListerExpansion interface{}
+
+// SpringBootContainerListerExpansion allows custom methods to be added to
+// SpringBootContainerLister.
+type SpringBootContainerListerExpansion interface{}
+
+// SpringBootContainerNamespaceListerExpansion allows custom methods to be added to
+// SpringBootContainerNamespaceLister.
+type SpringBootContainerNamespaceListerExpansion interface{}

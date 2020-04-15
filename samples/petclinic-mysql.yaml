@@ -1,0 +1,110 @@
+---
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: ServiceBinding
+metadata:
+  name: mysql
+spec:
+  subject:
+    apiVersion: extensions/v1beta1
+    kind: ReplicaSet
+    selector:
+      matchExpressions:
+      - key: services.mononoke.local/mysql
+        operator: Exists
+      - key: app
+        operator: In
+        values:
+        - petclinic
+  provider:
+    apiVersion: bindings.projectriff.io/v1alpha1
+    kind: BindableService
+    name: mysql
+
+---
+apiVersion: bindings.projectriff.io/v1alpha1
+kind: BindableService
+metadata:
+  name: mysql
+spec:
+  binding:
+    metadata:
+      name: mysql-binding
+    secret:
+      name: mysql-binding
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-binding
+data:
+  kind: mysql
+  provider: test
+  tags: ""
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysql-binding
+type: Opaque
+stringData:
+  hostname: mysql
+  jdbcUrl: jdbc:mysql://mysql:3306/db?user=cat&password=notcat
+  name: db
+  password: notcat
+  port: "3306"
+  uri: mysql://cat:notcat@mysql:3306/db?reconnect=true
+  username: cat
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: mysql-binding
+              key: username
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-binding
+              key: password
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: mysql-binding
+              key: name
+        - name: MYSQL_ROOT_PASSWORD
+          value: root
+        ports:
+        - containerPort: 3306
+          name: mysql

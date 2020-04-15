@@ -30,6 +30,8 @@ type Interface interface {
 	ImageBindings() ImageBindingInformer
 	// ServiceBindings returns a ServiceBindingInformer.
 	ServiceBindings() ServiceBindingInformer
+	// SpringBootContainers returns a SpringBootContainerInformer.
+	SpringBootContainers() SpringBootContainerInformer
 }
 
 type version struct {
@@ -56,4 +58,9 @@ func (v *version) ImageBindings() ImageBindingInformer {
 // ServiceBindings returns a ServiceBindingInformer.
 func (v *version) ServiceBindings() ServiceBindingInformer {
 	return &serviceBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// SpringBootContainers returns a SpringBootContainerInformer.
+func (v *version) SpringBootContainers() SpringBootContainerInformer {
+	return &springBootContainerInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

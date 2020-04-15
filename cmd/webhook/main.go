@@ -43,6 +43,7 @@ import (
 	"github.com/projectriff/bindings/pkg/reconciler/bindableservice"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
 	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/springbootcontainer"
 )
 
 var (
@@ -69,9 +70,10 @@ var (
 )
 
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("BindableService"): &v1alpha1.BindableService{},
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):    &v1alpha1.ImageBinding{},
-	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):  &v1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("BindableService"):     &v1alpha1.BindableService{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):        &v1alpha1.ImageBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):      &v1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("SpringBootContainer"): &v1alpha1.SpringBootContainer{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
@@ -178,10 +180,12 @@ func main() {
 		bindableservice.NewController,
 		imagebinding.NewController,
 		servicebinding.NewController,
+		springbootcontainer.NewController,
 
 		// For each binding we also have a binding webhook.
 		NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
 		NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
+		NewBindingWebhook("springbootcontainers", springbootcontainer.ListAll, springbootcontainer.WithContextFactory),
 	)
 }
 

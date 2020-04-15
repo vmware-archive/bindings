@@ -23,3 +23,5 @@ type BindableServiceExpansion interface{}
 type ImageBindingExpansion interface{}
 
 type ServiceBindingExpansion interface{}
+
+type SpringBootContainerExpansion interface{}

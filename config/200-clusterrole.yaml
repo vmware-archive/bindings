@@ -59,6 +59,9 @@ rules:
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["get", "list", "patch", "watch"]
+  - apiGroups: ["extensions"]
+    resources: ["replicasets"]
+    verbs: ["get", "list", "patch", "watch"]
 ---
 # This piece of the aggregated cluster role enables us to bind to
 # Knative service resources

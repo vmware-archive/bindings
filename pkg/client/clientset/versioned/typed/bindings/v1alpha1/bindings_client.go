@@ -29,6 +29,7 @@ type BindingsV1alpha1Interface interface {
 	BindableServicesGetter
 	ImageBindingsGetter
 	ServiceBindingsGetter
+	SpringBootContainersGetter
 }
 
 // BindingsV1alpha1Client is used to interact with features provided by the bindings.projectriff.io group.
@@ -46,6 +47,10 @@ func (c *BindingsV1alpha1Client) ImageBindings(namespace string) ImageBindingInt
 
 func (c *BindingsV1alpha1Client) ServiceBindings(namespace string) ServiceBindingInterface {
 	return newServiceBindings(c, namespace)
+}
+
+func (c *BindingsV1alpha1Client) SpringBootContainers(namespace string) SpringBootContainerInterface {
+	return newSpringBootContainers(c, namespace)
 }
 
 // NewForConfig creates a new BindingsV1alpha1Client for the given config.

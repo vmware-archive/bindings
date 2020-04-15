@@ -40,6 +40,10 @@ func (c *FakeBindingsV1alpha1) ServiceBindings(namespace string) v1alpha1.Servic
 	return &FakeServiceBindings{c, namespace}
 }
 
+func (c *FakeBindingsV1alpha1) SpringBootContainers(namespace string) v1alpha1.SpringBootContainerInterface {
+	return &FakeSpringBootContainers{c, namespace}
+}
+
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
 func (c *FakeBindingsV1alpha1) RESTClient() rest.Interface {

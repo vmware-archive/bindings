@@ -96,6 +96,22 @@ webhooks:
   failurePolicy: Fail
   name: imagebindings.webhook.bindings.projectriff.io
 ---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: springbootcontainers.webhook.bindings.projectriff.io
+  labels:
+    bindings.projectriff.io/release: devel
+webhooks:
+- admissionReviewVersions:
+  - v1beta1
+  clientConfig:
+    service:
+      name: webhook
+      namespace: binding-system
+  failurePolicy: Fail
+  name: springbootcontainers.webhook.bindings.projectriff.io
+---
 apiVersion: v1
 kind: Secret
 metadata:

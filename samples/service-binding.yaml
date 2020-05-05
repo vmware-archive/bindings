@@ -23,6 +23,12 @@ spec:
       name: mysql-binding
     secret:
       name: mysql-binding
+#status: # status is created by the BindableService controller, but implements the duck-type
+#  binding:
+#    metadata:
+#      name: mysql-binding
+#    secret:
+#      name: mysql-binding
 
 ---
 apiVersion: v1

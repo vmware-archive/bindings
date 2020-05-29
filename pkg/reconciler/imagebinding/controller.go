@@ -27,6 +27,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"knative.dev/pkg/apis/duck"
 	"knative.dev/pkg/client/injection/ducks/duck/v1/podspecable"
+	nsinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/namespace"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/injection/clients/dynamicclient"
@@ -50,6 +51,7 @@ func NewController(
 ) *controller.Impl {
 	logger := logging.FromContext(ctx)
 	ibInformer := imginformer.Get(ctx)
+	nsInformer := nsinformer.Get(ctx)
 	dc := dynamicclient.Get(ctx)
 
 	psInformerFactory := podspecable.Get(ctx)
@@ -61,6 +63,7 @@ func NewController(
 		DynamicClient: dc,
 		Recorder: record.NewBroadcaster().NewRecorder(
 			scheme.Scheme, corev1.EventSource{Component: controllerAgentName}),
+		NamespaceLister: nsInformer.Lister(),
 	}
 
 	impl := controller.NewImpl(c, logger, "ImageBindings")

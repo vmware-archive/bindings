@@ -23,7 +23,7 @@ var serviceCondSet = apis.NewLivingConditionSet(
 )
 
 func (b *ServiceBinding) GetSubject() tracker.Reference {
-	return *b.Spec.Subject
+	return *b.Spec.Application
 }
 
 func (b *ServiceBinding) GetBindingStatus() duck.BindableStatus {

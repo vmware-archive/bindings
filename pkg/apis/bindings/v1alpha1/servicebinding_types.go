@@ -39,12 +39,12 @@ var (
 )
 
 type ServiceBindingSpec struct {
-	// Subject resource to bind into
-	Subject *tracker.Reference `json:"subject,omitempty"`
+	// Application resource to inject the binding into
+	Application *tracker.Reference `json:"application,omitempty"`
 	// Service referencing the binding secret
 	Service *tracker.Reference `json:"service,omitempty"`
-	// ContainerName targets a specific container within the subject to inject
-	// into. If not set, all container will be injected
+	// ContainerName targets a specific container within the application to
+	// inject into. If not set, all container will be injected
 	ContainerName string `json:"containerName,omitempty"`
 }
 
@@ -62,11 +62,11 @@ type ServiceBindingList struct {
 
 func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	errs = errs.Also(
-		b.Spec.Subject.Validate(ctx).ViaField("spec.subject"),
+		b.Spec.Application.Validate(ctx).ViaField("spec.application"),
 	)
-	if b.Spec.Subject.Namespace != b.Namespace {
+	if b.Spec.Application.Namespace != b.Namespace {
 		errs = errs.Also(
-			apis.ErrInvalidValue(b.Spec.Subject.Namespace, "spec.subject.namespace"),
+			apis.ErrInvalidValue(b.Spec.Application.Namespace, "spec.application.namespace"),
 		)
 	}
 	errs = errs.Also(
@@ -87,9 +87,9 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 }
 
 func (b *ServiceBinding) SetDefaults(context.Context) {
-	if b.Spec.Subject.Namespace == "" {
-		// Default the subject's namespace to our namespace.
-		b.Spec.Subject.Namespace = b.Namespace
+	if b.Spec.Application.Namespace == "" {
+		// Default the application's namespace to our namespace.
+		b.Spec.Application.Namespace = b.Namespace
 	}
 	if b.Spec.Service.Namespace == "" {
 		// Default the service's namespace to our namespace.

@@ -3,7 +3,7 @@ kind: ServiceBinding
 metadata:
   name: account-db
 spec:
-  subject:
+  application:
     apiVersion: apps/v1
     kind: Deployment
     name: test-deployment

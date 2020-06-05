@@ -7,6 +7,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: test-deployment
+    containers:
+    - test-container
   service:
     apiVersion: bindings.projectriff.io/v1alpha1
     kind: ProvisionedService

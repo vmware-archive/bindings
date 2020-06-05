@@ -5,6 +5,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck"
 	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
@@ -40,12 +41,18 @@ var (
 
 type ServiceBindingSpec struct {
 	// Application resource to inject the binding into
-	Application *tracker.Reference `json:"application,omitempty"`
+	Application *ApplicationReference `json:"application,omitempty"`
 	// Service referencing the binding secret
 	Service *tracker.Reference `json:"service,omitempty"`
-	// ContainerName targets a specific container within the application to
-	// inject into. If not set, all container will be injected
-	ContainerName string `json:"containerName,omitempty"`
+}
+
+type ApplicationReference struct {
+	tracker.Reference
+
+	// Containers to target within the application. If not set, all containers
+	// will be injected. Containers may be specified by index or name.
+	// InitContainers may only be specified by name.
+	Containers []intstr.IntOrString `json:"containers,omitempty"`
 }
 
 type ServiceBindingStatus struct {

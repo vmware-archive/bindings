@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck"
@@ -23,7 +24,7 @@ var serviceCondSet = apis.NewLivingConditionSet(
 )
 
 func (b *ServiceBinding) GetSubject() tracker.Reference {
-	return *b.Spec.Application
+	return b.Spec.Application.Reference
 }
 
 func (b *ServiceBinding) GetBindingStatus() duck.BindableStatus {
@@ -60,10 +61,16 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 		newVolumes.Insert(bindingVolume)
 	}
 	for i := range ps.Spec.Template.Spec.InitContainers {
-		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], bindingVolume)
+		c := &ps.Spec.Template.Spec.InitContainers[i]
+		if b.isTargetContainer(-1, c) {
+			b.DoContainer(ctx, ps, c, bindingVolume)
+		}
 	}
 	for i := range ps.Spec.Template.Spec.Containers {
-		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], bindingVolume)
+		c := &ps.Spec.Template.Spec.Containers[i]
+		if b.isTargetContainer(i, c) {
+			b.DoContainer(ctx, ps, c, bindingVolume)
+		}
 	}
 
 	// track which volumes are injected, so they can be removed when no longer used
@@ -71,11 +78,6 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 }
 
 func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, bindingVolume string) {
-	if c.Name != b.Spec.ContainerName && b.Spec.ContainerName != "" {
-		// ignore the container
-		return
-	}
-
 	mountPath := ""
 	// lookup predefined mount path
 	for _, e := range c.Env {
@@ -106,6 +108,26 @@ func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *cor
 			ReadOnly:  true,
 		})
 	}
+}
+
+func (b *ServiceBinding) isTargetContainer(idx int, c *corev1.Container) bool {
+	targets := b.Spec.Application.Containers
+	if len(targets) == 0 {
+		return true
+	}
+	for _, t := range targets {
+		switch t.Type {
+		case intstr.Int:
+			if idx == t.IntValue() {
+				return true
+			}
+		case intstr.String:
+			if c.Name == t.String() {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (b *ServiceBinding) Undo(ctx context.Context, ps *v1.WithPod) {

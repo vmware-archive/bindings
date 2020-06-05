@@ -104,7 +104,7 @@ func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *cor
 		// inject metadata
 		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
 			Name:      bindingVolume,
-			MountPath: fmt.Sprintf("%s/%s", mountPath, b.Name),
+			MountPath: fmt.Sprintf("%s/%s", mountPath, b.Spec.Name),
 			ReadOnly:  true,
 		})
 	}

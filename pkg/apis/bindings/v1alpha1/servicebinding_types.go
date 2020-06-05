@@ -40,6 +40,9 @@ var (
 )
 
 type ServiceBindingSpec struct {
+	// Name of the service binding on disk, defaults to this resource's name
+	Name string `json:"name,omitempty"`
+
 	// Application resource to inject the binding into
 	Application *ApplicationReference `json:"application,omitempty"`
 	// Service referencing the binding secret
@@ -94,6 +97,9 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 }
 
 func (b *ServiceBinding) SetDefaults(context.Context) {
+	if b.Spec.Name == "" {
+		b.Spec.Name = b.Name
+	}
 	if b.Spec.Application.Namespace == "" {
 		// Default the application's namespace to our namespace.
 		b.Spec.Application.Namespace = b.Namespace

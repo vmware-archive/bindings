@@ -294,8 +294,8 @@ func (in *ServiceBindingSpec) DeepCopyInto(out *ServiceBindingSpec) {
 		*out = new(tracker.Reference)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.Provider != nil {
-		in, out := &in.Provider, &out.Provider
+	if in.Service != nil {
+		in, out := &in.Service, &out.Service
 		*out = new(tracker.Reference)
 		(*in).DeepCopyInto(*out)
 	}

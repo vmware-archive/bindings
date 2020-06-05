@@ -105,7 +105,7 @@ func WithContextFactory(ctx context.Context, handler func(name types.NamespacedN
 	r := resolver.NewServiceableResolver(ctx, handler)
 	return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
 		sb := b.(*v1alpha1.ServiceBinding)
-		serviceableBinding, err := r.ServiceableFromObjectReference(sb.Spec.Provider, sb)
+		serviceableBinding, err := r.ServiceableFromObjectReference(sb.Spec.Service, sb)
 		if err != nil {
 			return nil, err
 		}

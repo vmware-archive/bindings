@@ -53,7 +53,7 @@ jobs:
         readonly slug=${version}-${git_timestamp}-${git_sha:0:16}
 
         ko resolve -t ${slug} --strict -f config > riff-bindings.yaml
-        gsutil cp -a public-read riff-bindings.yaml gs://projectriff/riff-bindings/snapshots/${slug}/riff-bindings.yaml
+        gsutil cp riff-bindings.yaml gs://projectriff/riff-bindings/snapshots/${slug}/riff-bindings.yaml
       env:
         KO_DOCKER_REPO: gcr.io/projectriff/bindings
   
@@ -101,16 +101,16 @@ jobs:
         fi
 
         echo "Promote artifacts"
-        gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${slug}/
+        gsutil -h "${cache_control}" rsync -d ${bucket}/snapshots/${slug}/ ${bucket}/${slug}/
         if [[ ${version} != *"-snapshot" ]] ; then
-          gsutil -h "${cache_control}" rsync -a public-read -d ${bucket}/snapshots/${slug}/ ${bucket}/${version}/
+          gsutil -h "${cache_control}" rsync -d ${bucket}/snapshots/${slug}/ ${bucket}/${version}/
         fi
 
         echo "Capture snapshot slug"
-        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${git_branch}
-        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${version}
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${git_branch}
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${version}
         if [[ ${version} != *"-snapshot" ]] ; then
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${git_branch}
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${git_branch}
           # avoids overwriting existing values
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n -a public-read <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${version}
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${version}
         fi

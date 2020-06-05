@@ -46,10 +46,9 @@ import (
 )
 
 var (
-	WebhookName = "bindings-webhook"
 	//BindingExcludeLabel can be applied to exclude resource from webhook
 	BindingExcludeLabel = "bindings.projectriff.io/exclude"
-	//BindingINcludeLabel can be applied to include resource in webhook
+	//BindingIncludeLabel can be applied to include resource in webhook
 	BindingIncludeLabel = "bindings.projectriff.io/include"
 
 	ExclusionSelector = metav1.LabelSelector{
@@ -67,7 +66,6 @@ var (
 		}},
 	}
 )
-
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
 	v1alpha1.SchemeGroupVersion.WithKind("BindableService"): &v1alpha1.BindableService{},
 	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):    &v1alpha1.ImageBinding{},
@@ -165,7 +163,7 @@ func main() {
 		SecretName:  "webhook-certs",
 	})
 
-	sharedmain.WebhookMainWithContext(ctx, WebhookName,
+	sharedmain.WebhookMainWithContext(ctx, "webhook",
 		// Our singleton certificate controller.
 		certificates.NewController,
 
@@ -174,14 +172,10 @@ func main() {
 		NewValidationAdmissionController,
 		NewConfigValidationController,
 
-		// For each resource we have a controller.
+		// For each binding we have a controller and a binding webhook.
 		bindableservice.NewController,
-		imagebinding.NewController,
-		servicebinding.NewController,
-
-		// For each binding we also have a binding webhook.
-		NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
-		NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
+		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
+		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
 	)
 }
 

@@ -11,12 +11,7 @@ import (
 // +genduck
 
 type Serviceable struct {
-	Binding ServiceableBinding `json:"binding"`
-}
-
-type ServiceableBinding struct {
-	Metadata corev1.LocalObjectReference `json:"metadata"`
-	Secret   corev1.LocalObjectReference `json:"secret"`
+	Binding corev1.LocalObjectReference `json:"binding"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -38,10 +33,7 @@ func (*ServiceableType) GetListType() runtime.Object {
 
 func (t *ServiceableType) Populate() {
 	t.Status = Serviceable{
-		Binding: ServiceableBinding{
-			Metadata: corev1.LocalObjectReference{Name: "my-metadata"},
-			Secret:   corev1.LocalObjectReference{Name: "my-secret"},
-		},
+		Binding: corev1.LocalObjectReference{Name: "my-secret"},
 	}
 }
 

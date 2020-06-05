@@ -7,6 +7,7 @@ import (
 
 	iduckv1alpha1 "github.com/projectriff/bindings/pkg/apis/duck/v1alpha1"
 	"github.com/projectriff/bindings/pkg/client/injection/ducks/duck/v1alpha1/serviceable"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/types"
 	pkgapisduck "knative.dev/pkg/apis/duck"
@@ -35,7 +36,7 @@ func NewServiceableResolver(ctx context.Context, callback func(types.NamespacedN
 	return ret
 }
 
-func (r *ServiceableResolver) ServiceableFromObjectReference(ref *tracker.Reference, parent interface{}) (*iduckv1alpha1.ServiceableBinding, error) {
+func (r *ServiceableResolver) ServiceableFromObjectReference(ref *tracker.Reference, parent interface{}) (*corev1.LocalObjectReference, error) {
 	if ref == nil {
 		return nil, errors.New("ref is nil")
 	}

@@ -46,44 +46,31 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	}
 	// TODO ensure unique volume names
 	// TODO limit volume name length
-	metadataVolume := fmt.Sprintf("%s-metadata", sb.Metadata.Name)
-	secretVolume := fmt.Sprintf("%s-secret", sb.Secret.Name)
-	if !existingVolumes.Has(metadataVolume) {
+	bindingVolume := fmt.Sprintf("%s-binding", sb.Name)
+	if !existingVolumes.Has(bindingVolume) {
 		ps.Spec.Template.Spec.Volumes = append(ps.Spec.Template.Spec.Volumes, corev1.Volume{
-			Name: metadataVolume,
+			Name: bindingVolume,
 			VolumeSource: corev1.VolumeSource{
 				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: sb.Metadata,
+					LocalObjectReference: *sb,
 				},
 			},
 		})
-		existingVolumes.Insert(metadataVolume)
-		newVolumes.Insert(metadataVolume)
-	}
-	if b.Spec.BindingMode == SecretServiceBinding && !existingVolumes.Has(secretVolume) {
-		ps.Spec.Template.Spec.Volumes = append(ps.Spec.Template.Spec.Volumes, corev1.Volume{
-			Name: secretVolume,
-			VolumeSource: corev1.VolumeSource{
-				Secret: &corev1.SecretVolumeSource{
-					SecretName: sb.Secret.Name,
-				},
-			},
-		})
-		existingVolumes.Insert(secretVolume)
-		newVolumes.Insert(secretVolume)
+		existingVolumes.Insert(bindingVolume)
+		newVolumes.Insert(bindingVolume)
 	}
 	for i := range ps.Spec.Template.Spec.InitContainers {
-		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], metadataVolume, secretVolume)
+		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], bindingVolume)
 	}
 	for i := range ps.Spec.Template.Spec.Containers {
-		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], metadataVolume, secretVolume)
+		b.DoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], bindingVolume)
 	}
 
 	// track which volumes are injected, so they can be removed when no longer used
 	ps.Annotations[b.annotationKey()] = strings.Join(newVolumes.List(), ",")
 }
 
-func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, metadataVolume, secretVolume string) {
+func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, bindingVolume string) {
 	if c.Name != b.Spec.ContainerName && b.Spec.ContainerName != "" {
 		// ignore the container
 		return
@@ -92,16 +79,16 @@ func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *cor
 	mountPath := ""
 	// lookup predefined mount path
 	for _, e := range c.Env {
-		if e.Name == "CNB_BINDINGS" {
+		if e.Name == "SERVICE_BINDINGS_ROOT" {
 			mountPath = e.Value
 			break
 		}
 	}
 	if mountPath == "" {
 		// default mount path
-		mountPath = "/platform/bindings"
+		mountPath = "/bindings"
 		c.Env = append(c.Env, corev1.EnvVar{
-			Name:  "CNB_BINDINGS",
+			Name:  "SERVICE_BINDINGS_ROOT",
 			Value: mountPath,
 		})
 	}
@@ -111,19 +98,11 @@ func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *cor
 		containerVolumes.Insert(vm.Name)
 	}
 
-	if !containerVolumes.Has(metadataVolume) {
+	if !containerVolumes.Has(bindingVolume) {
 		// inject metadata
 		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
-			Name:      metadataVolume,
-			MountPath: fmt.Sprintf("%s/%s/metadata", mountPath, b.Name),
-			ReadOnly:  true,
-		})
-	}
-	if !containerVolumes.Has(secretVolume) && b.Spec.BindingMode == SecretServiceBinding {
-		// inject secret
-		c.VolumeMounts = append(c.VolumeMounts, corev1.VolumeMount{
-			Name:      secretVolume,
-			MountPath: fmt.Sprintf("%s/%s/secret", mountPath, b.Name),
+			Name:      bindingVolume,
+			MountPath: fmt.Sprintf("%s/%s", mountPath, b.Name),
 			ReadOnly:  true,
 		})
 	}

@@ -1,7 +1,7 @@
 apiVersion: bindings.projectriff.io/v1alpha1
 kind: ServiceBinding
 metadata:
-  name: mysql
+  name: account-db
 spec:
   subject:
     apiVersion: apps/v1
@@ -10,43 +10,28 @@ spec:
   provider:
     apiVersion: bindings.projectriff.io/v1alpha1
     kind: BindableService
-    name: mysql
+    name: account-db
 
 ---
 apiVersion: bindings.projectriff.io/v1alpha1
 kind: BindableService
 metadata:
-  name: mysql
+  name: account-db
 spec:
   binding:
-    metadata:
-      name: mysql-binding
-    secret:
-      name: mysql-binding
+    name: account-db-service
 #status: # status is created by the BindableService controller, but implements the duck-type
 #  binding:
-#    metadata:
-#      name: mysql-binding
-#    secret:
-#      name: mysql-binding
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mysql-binding
-data:
-  kind: mysql
-  provider: test
-  tags: ""
+#    name: account-db-service
 
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  name: mysql-binding
+  name: account-db-service
 type: Opaque
 stringData:
+  type: mysql
   hostname: localhost
   jdbcUrl: jdbc:mysql://localhost:3306/default?user=root&password=
   name: default

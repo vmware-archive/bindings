@@ -46,19 +46,7 @@ type ServiceBindingSpec struct {
 	// ContainerName targets a specific container within the subject to inject
 	// into. If not set, all container will be injected
 	ContainerName string `json:"containerName,omitempty"`
-	// BindingMode restricts which aspects of the provisioned binding are
-	// exposed to the subject:
-	// - Metadata: mounts only the metadata
-	// - Secret: mounts the metadata and secret
-	BindingMode ServiceBindingMode `json:"bindingMode,omitempty"`
 }
-
-type ServiceBindingMode string
-
-const (
-	MetadataServiceBinding ServiceBindingMode = "Metadata"
-	SecretServiceBinding   ServiceBindingMode = "Secret"
-)
 
 type ServiceBindingStatus struct {
 	duckv1beta1.Status `json:",inline"`
@@ -94,11 +82,6 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 			apis.ErrMissingField("spec.provider.name"),
 		)
 	}
-	if b.Spec.BindingMode != MetadataServiceBinding && b.Spec.BindingMode != SecretServiceBinding {
-		errs = errs.Also(
-			apis.ErrInvalidValue(b.Spec.BindingMode, "spec.bindingMode"),
-		)
-	}
 
 	return errs
 }
@@ -111,9 +94,6 @@ func (b *ServiceBinding) SetDefaults(context.Context) {
 	if b.Spec.Provider.Namespace == "" {
 		// Default the provider's namespace to our namespace.
 		b.Spec.Provider.Namespace = b.Namespace
-	}
-	if b.Spec.BindingMode == "" {
-		b.Spec.BindingMode = SecretServiceBinding
 	}
 }
 

@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"context"
 
-	iduckv1alpha1 "github.com/projectriff/bindings/pkg/apis/duck/v1alpha1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
@@ -34,12 +34,12 @@ var (
 )
 
 type BindableServiceSpec struct {
-	Binding iduckv1alpha1.ServiceableBinding `json:"binding,omitempty"`
+	Binding corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 type BindableServiceStatus struct {
 	duckv1beta1.Status `json:",inline"`
-	Binding            iduckv1alpha1.ServiceableBinding `json:"binding,omitempty"`
+	Binding            corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -51,9 +51,9 @@ type BindableServiceList struct {
 }
 
 func (b *BindableService) Validate(ctx context.Context) (errs *apis.FieldError) {
-	if b.Spec.Binding.Metadata.Name == "" {
+	if b.Spec.Binding.Name == "" {
 		errs = errs.Also(
-			apis.ErrMissingField("spec.binding.metadata.name"),
+			apis.ErrMissingField("spec.binding.name"),
 		)
 	}
 

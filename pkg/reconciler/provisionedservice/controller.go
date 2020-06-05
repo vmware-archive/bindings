@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package bindableservice
+package provisionedservice
 
 import (
 	"context"
@@ -23,8 +23,8 @@ import (
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 
-	bindableserviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/bindableservice"
-	bindableservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/bindableservice"
+	provisionedserviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/provisionedservice"
+	provisionedservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/provisionedservice"
 )
 
 // NewController creates a Reconciler and returns the result of NewImpl.
@@ -34,14 +34,14 @@ func NewController(
 ) *controller.Impl {
 	logger := logging.FromContext(ctx)
 
-	bindableserviceInformer := bindableserviceinformer.Get(ctx)
+	provisionedserviceInformer := provisionedserviceinformer.Get(ctx)
 
 	r := &Reconciler{}
-	impl := bindableservicereconciler.NewImpl(ctx, r)
+	impl := provisionedservicereconciler.NewImpl(ctx, r)
 
 	logger.Info("Setting up event handlers.")
 
-	bindableserviceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
+	provisionedserviceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	return impl
 }

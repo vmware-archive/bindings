@@ -26,8 +26,8 @@ import (
 
 type BindingsV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	BindableServicesGetter
 	ImageBindingsGetter
+	ProvisionedServicesGetter
 	ServiceBindingsGetter
 }
 
@@ -36,12 +36,12 @@ type BindingsV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *BindingsV1alpha1Client) BindableServices(namespace string) BindableServiceInterface {
-	return newBindableServices(c, namespace)
-}
-
 func (c *BindingsV1alpha1Client) ImageBindings(namespace string) ImageBindingInterface {
 	return newImageBindings(c, namespace)
+}
+
+func (c *BindingsV1alpha1Client) ProvisionedServices(namespace string) ProvisionedServiceInterface {
+	return newProvisionedServices(c, namespace)
 }
 
 func (c *BindingsV1alpha1Client) ServiceBindings(namespace string) ServiceBindingInterface {

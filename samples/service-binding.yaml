@@ -9,18 +9,18 @@ spec:
     name: test-deployment
   provider:
     apiVersion: bindings.projectriff.io/v1alpha1
-    kind: BindableService
+    kind: ProvisionedService
     name: account-db
 
 ---
 apiVersion: bindings.projectriff.io/v1alpha1
-kind: BindableService
+kind: ProvisionedService
 metadata:
   name: account-db
 spec:
   binding:
     name: account-db-service
-#status: # status is created by the BindableService controller, but implements the duck-type
+#status: # status is created by the ProvisionedService controller, but implements the duck-type
 #  binding:
 #    name: account-db-service
 

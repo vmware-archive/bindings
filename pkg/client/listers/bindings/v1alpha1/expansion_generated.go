@@ -18,14 +18,6 @@ limitations under the License.
 
 package v1alpha1
 
-// BindableServiceListerExpansion allows custom methods to be added to
-// BindableServiceLister.
-type BindableServiceListerExpansion interface{}
-
-// BindableServiceNamespaceListerExpansion allows custom methods to be added to
-// BindableServiceNamespaceLister.
-type BindableServiceNamespaceListerExpansion interface{}
-
 // ImageBindingListerExpansion allows custom methods to be added to
 // ImageBindingLister.
 type ImageBindingListerExpansion interface{}
@@ -33,6 +25,14 @@ type ImageBindingListerExpansion interface{}
 // ImageBindingNamespaceListerExpansion allows custom methods to be added to
 // ImageBindingNamespaceLister.
 type ImageBindingNamespaceListerExpansion interface{}
+
+// ProvisionedServiceListerExpansion allows custom methods to be added to
+// ProvisionedServiceLister.
+type ProvisionedServiceListerExpansion interface{}
+
+// ProvisionedServiceNamespaceListerExpansion allows custom methods to be added to
+// ProvisionedServiceNamespaceLister.
+type ProvisionedServiceNamespaceListerExpansion interface{}
 
 // ServiceBindingListerExpansion allows custom methods to be added to
 // ServiceBindingLister.

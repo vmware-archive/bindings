@@ -28,12 +28,12 @@ type FakeBindingsV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeBindingsV1alpha1) BindableServices(namespace string) v1alpha1.BindableServiceInterface {
-	return &FakeBindableServices{c, namespace}
-}
-
 func (c *FakeBindingsV1alpha1) ImageBindings(namespace string) v1alpha1.ImageBindingInterface {
 	return &FakeImageBindings{c, namespace}
+}
+
+func (c *FakeBindingsV1alpha1) ProvisionedServices(namespace string) v1alpha1.ProvisionedServiceInterface {
+	return &FakeProvisionedServices{c, namespace}
 }
 
 func (c *FakeBindingsV1alpha1) ServiceBindings(namespace string) v1alpha1.ServiceBindingInterface {

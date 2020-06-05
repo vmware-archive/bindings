@@ -24,10 +24,10 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// BindableServices returns a BindableServiceInformer.
-	BindableServices() BindableServiceInformer
 	// ImageBindings returns a ImageBindingInformer.
 	ImageBindings() ImageBindingInformer
+	// ProvisionedServices returns a ProvisionedServiceInformer.
+	ProvisionedServices() ProvisionedServiceInformer
 	// ServiceBindings returns a ServiceBindingInformer.
 	ServiceBindings() ServiceBindingInformer
 }
@@ -43,14 +43,14 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// BindableServices returns a BindableServiceInformer.
-func (v *version) BindableServices() BindableServiceInformer {
-	return &bindableServiceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
 // ImageBindings returns a ImageBindingInformer.
 func (v *version) ImageBindings() ImageBindingInformer {
 	return &imageBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+}
+
+// ProvisionedServices returns a ProvisionedServiceInformer.
+func (v *version) ProvisionedServices() ProvisionedServiceInformer {
+	return &provisionedServiceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // ServiceBindings returns a ServiceBindingInformer.

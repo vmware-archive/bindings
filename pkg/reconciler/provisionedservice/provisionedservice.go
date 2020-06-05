@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package bindableservice
+package provisionedservice
 
 import (
 	"context"
@@ -22,25 +22,25 @@ import (
 	corev1 "k8s.io/api/core/v1"
 
 	bindingsv1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	bindableservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/bindableservice"
+	provisionedservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/provisionedservice"
 	"knative.dev/pkg/reconciler"
 )
 
 // newReconciledNormal makes a new reconciler event with event type Normal, and
-// reason BindableServiceReconciled.
+// reason ProvisionedServiceReconciled.
 func newReconciledNormal(namespace, name string) reconciler.Event {
-	return reconciler.NewEvent(corev1.EventTypeNormal, "BindableServiceReconciled", "BindableService reconciled: \"%s/%s\"", namespace, name)
+	return reconciler.NewEvent(corev1.EventTypeNormal, "ProvisionedServiceReconciled", "ProvisionedService reconciled: \"%s/%s\"", namespace, name)
 }
 
-// Reconciler implements bindableservicereconciler.Interface for
-// BindableService resources.
+// Reconciler implements provisionedservicereconciler.Interface for
+// ProvisionedService resources.
 type Reconciler struct{}
 
 // Check that our Reconciler implements Interface
-var _ bindableservicereconciler.Interface = (*Reconciler)(nil)
+var _ provisionedservicereconciler.Interface = (*Reconciler)(nil)
 
 // ReconcileKind implements Interface.ReconcileKind.
-func (r *Reconciler) ReconcileKind(ctx context.Context, o *bindingsv1alpha1.BindableService) reconciler.Event {
+func (r *Reconciler) ReconcileKind(ctx context.Context, o *bindingsv1alpha1.ProvisionedService) reconciler.Event {
 	if o.GetDeletionTimestamp() != nil {
 		// Check for a DeletionTimestamp.  If present, elide the normal reconcile logic.
 		// When a controller needs finalizer handling, it would go here.

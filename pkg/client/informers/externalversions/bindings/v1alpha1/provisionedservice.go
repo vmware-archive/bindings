@@ -31,59 +31,59 @@ import (
 	cache "k8s.io/client-go/tools/cache"
 )
 
-// BindableServiceInformer provides access to a shared informer and lister for
-// BindableServices.
-type BindableServiceInformer interface {
+// ProvisionedServiceInformer provides access to a shared informer and lister for
+// ProvisionedServices.
+type ProvisionedServiceInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.BindableServiceLister
+	Lister() v1alpha1.ProvisionedServiceLister
 }
 
-type bindableServiceInformer struct {
+type provisionedServiceInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
 	namespace        string
 }
 
-// NewBindableServiceInformer constructs a new informer for BindableService type.
+// NewProvisionedServiceInformer constructs a new informer for ProvisionedService type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewBindableServiceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredBindableServiceInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewProvisionedServiceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredProvisionedServiceInformer(client, namespace, resyncPeriod, indexers, nil)
 }
 
-// NewFilteredBindableServiceInformer constructs a new informer for BindableService type.
+// NewFilteredProvisionedServiceInformer constructs a new informer for ProvisionedService type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredBindableServiceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredProvisionedServiceInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().BindableServices(namespace).List(options)
+				return client.BindingsV1alpha1().ProvisionedServices(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().BindableServices(namespace).Watch(options)
+				return client.BindingsV1alpha1().ProvisionedServices(namespace).Watch(options)
 			},
 		},
-		&bindingsv1alpha1.BindableService{},
+		&bindingsv1alpha1.ProvisionedService{},
 		resyncPeriod,
 		indexers,
 	)
 }
 
-func (f *bindableServiceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredBindableServiceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+func (f *provisionedServiceInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredProvisionedServiceInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
-func (f *bindableServiceInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&bindingsv1alpha1.BindableService{}, f.defaultInformer)
+func (f *provisionedServiceInformer) Informer() cache.SharedIndexInformer {
+	return f.factory.InformerFor(&bindingsv1alpha1.ProvisionedService{}, f.defaultInformer)
 }
 
-func (f *bindableServiceInformer) Lister() v1alpha1.BindableServiceLister {
-	return v1alpha1.NewBindableServiceLister(f.Informer().GetIndexer())
+func (f *provisionedServiceInformer) Lister() v1alpha1.ProvisionedServiceLister {
+	return v1alpha1.NewProvisionedServiceLister(f.Informer().GetIndexer())
 }

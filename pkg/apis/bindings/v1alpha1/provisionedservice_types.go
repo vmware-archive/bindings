@@ -12,46 +12,46 @@ import (
 )
 
 const (
-	BindableServiceAnnotationKey = GroupName + "/bindable-service"
+	ProvisionedServiceAnnotationKey = GroupName + "/provisioned-service"
 )
 
 // +genclient
 // +genreconciler
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-type BindableService struct {
+type ProvisionedService struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   BindableServiceSpec   `json:"spec,omitempty"`
-	Status BindableServiceStatus `json:"status,omitempty"`
+	Spec   ProvisionedServiceSpec   `json:"spec,omitempty"`
+	Status ProvisionedServiceStatus `json:"status,omitempty"`
 }
 
 var (
-	// Check that BindableService can be validated and defaulted.
-	_ apis.Validatable   = (*BindableService)(nil)
-	_ apis.Defaultable   = (*BindableService)(nil)
-	_ kmeta.OwnerRefable = (*BindableService)(nil)
+	// Check that ProvisionedService can be validated and defaulted.
+	_ apis.Validatable   = (*ProvisionedService)(nil)
+	_ apis.Defaultable   = (*ProvisionedService)(nil)
+	_ kmeta.OwnerRefable = (*ProvisionedService)(nil)
 )
 
-type BindableServiceSpec struct {
+type ProvisionedServiceSpec struct {
 	Binding corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
-type BindableServiceStatus struct {
+type ProvisionedServiceStatus struct {
 	duckv1beta1.Status `json:",inline"`
 	Binding            corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type BindableServiceList struct {
+type ProvisionedServiceList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []BindableService `json:"items"`
+	Items           []ProvisionedService `json:"items"`
 }
 
-func (b *BindableService) Validate(ctx context.Context) (errs *apis.FieldError) {
-	if b.Spec.Binding.Name == "" {
+func (p *ProvisionedService) Validate(ctx context.Context) (errs *apis.FieldError) {
+	if p.Spec.Binding.Name == "" {
 		errs = errs.Also(
 			apis.ErrMissingField("spec.binding.name"),
 		)
@@ -60,10 +60,10 @@ func (b *BindableService) Validate(ctx context.Context) (errs *apis.FieldError) 
 	return errs
 }
 
-func (b *BindableService) SetDefaults(context.Context) {
+func (p *ProvisionedService) SetDefaults(context.Context) {
 	// nothing to do
 }
 
-func (b *BindableService) GetGroupVersionKind() schema.GroupVersionKind {
-	return SchemeGroupVersion.WithKind("BindableService")
+func (p *ProvisionedService) GetGroupVersionKind() schema.GroupVersionKind {
+	return SchemeGroupVersion.WithKind("ProvisionedService")
 }

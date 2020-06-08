@@ -23,9 +23,9 @@ import (
 	json "encoding/json"
 	reflect "reflect"
 
-	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	versioned "github.com/projectriff/bindings/pkg/client/clientset/versioned"
-	bindingsv1alpha1 "github.com/projectriff/bindings/pkg/client/listers/bindings/v1alpha1"
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/client/listers/service/v1alpha1"
 	zap "go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	equality "k8s.io/apimachinery/pkg/api/equality"
@@ -69,7 +69,7 @@ type reconcilerImpl struct {
 	Client versioned.Interface
 
 	// Listers index properties about resources
-	Lister bindingsv1alpha1.ProvisionedServiceLister
+	Lister servicev1alpha1.ProvisionedServiceLister
 
 	// Recorder is an event recorder for recording Event resources to the
 	// Kubernetes API.
@@ -89,7 +89,7 @@ type reconcilerImpl struct {
 // Check that our Reconciler implements controller.Reconciler
 var _ controller.Reconciler = (*reconcilerImpl)(nil)
 
-func NewReconciler(ctx context.Context, logger *zap.SugaredLogger, client versioned.Interface, lister bindingsv1alpha1.ProvisionedServiceLister, recorder record.EventRecorder, r Interface, options ...controller.Options) controller.Reconciler {
+func NewReconciler(ctx context.Context, logger *zap.SugaredLogger, client versioned.Interface, lister servicev1alpha1.ProvisionedServiceLister, recorder record.EventRecorder, r Interface, options ...controller.Options) controller.Reconciler {
 	// Check the options function input. It should be 0 or 1.
 	if len(options) > 1 {
 		logger.Fatalf("up to one options struct is supported, found %d", len(options))
@@ -221,7 +221,7 @@ func (r *reconcilerImpl) updateStatus(existing *v1alpha1.ProvisionedService, des
 		// The first iteration tries to use the injectionInformer's state, subsequent attempts fetch the latest state via API.
 		if attempts > 0 {
 
-			getter := r.Client.BindingsV1alpha1().ProvisionedServices(desired.Namespace)
+			getter := r.Client.ServiceV1alpha1().ProvisionedServices(desired.Namespace)
 
 			existing, err = getter.Get(desired.Name, metav1.GetOptions{})
 			if err != nil {
@@ -236,7 +236,7 @@ func (r *reconcilerImpl) updateStatus(existing *v1alpha1.ProvisionedService, des
 
 		existing.Status = desired.Status
 
-		updater := r.Client.BindingsV1alpha1().ProvisionedServices(existing.Namespace)
+		updater := r.Client.ServiceV1alpha1().ProvisionedServices(existing.Namespace)
 
 		_, err = updater.UpdateStatus(existing)
 		return err
@@ -293,7 +293,7 @@ func (r *reconcilerImpl) updateFinalizersFiltered(ctx context.Context, resource 
 		return resource, err
 	}
 
-	patcher := r.Client.BindingsV1alpha1().ProvisionedServices(resource.Namespace)
+	patcher := r.Client.ServiceV1alpha1().ProvisionedServices(resource.Namespace)
 
 	resource, err = patcher.Patch(resource.Name, types.MergePatchType, patch)
 	if err != nil {

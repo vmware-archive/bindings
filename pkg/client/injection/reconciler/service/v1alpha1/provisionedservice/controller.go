@@ -26,7 +26,7 @@ import (
 
 	versionedscheme "github.com/projectriff/bindings/pkg/client/clientset/versioned/scheme"
 	client "github.com/projectriff/bindings/pkg/client/injection/client"
-	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/provisionedservice"
+	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/provisionedservice"
 	corev1 "k8s.io/api/core/v1"
 	watch "k8s.io/apimachinery/pkg/watch"
 	scheme "k8s.io/client-go/kubernetes/scheme"
@@ -39,7 +39,7 @@ import (
 
 const (
 	defaultControllerAgentName = "provisionedservice-controller"
-	defaultFinalizerName       = "provisionedservices.bindings.projectriff.io"
+	defaultFinalizerName       = "provisionedservices.service.binding"
 )
 
 // NewImpl returns a controller.Impl that handles queuing and feeding work from

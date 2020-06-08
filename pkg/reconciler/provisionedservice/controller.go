@@ -23,8 +23,8 @@ import (
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 
-	provisionedserviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/provisionedservice"
-	provisionedservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/provisionedservice"
+	provisionedserviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/provisionedservice"
+	provisionedservicereconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/service/v1alpha1/provisionedservice"
 )
 
 // NewController creates a Reconciler and returns the result of NewImpl.

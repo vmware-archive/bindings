@@ -26,12 +26,17 @@ import (
 
 type ServiceV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	ProvisionedServicesGetter
 	ServiceBindingsGetter
 }
 
 // ServiceV1alpha1Client is used to interact with features provided by the service.binding group.
 type ServiceV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *ServiceV1alpha1Client) ProvisionedServices(namespace string) ProvisionedServiceInterface {
+	return newProvisionedServices(c, namespace)
 }
 
 func (c *ServiceV1alpha1Client) ServiceBindings(namespace string) ServiceBindingInterface {

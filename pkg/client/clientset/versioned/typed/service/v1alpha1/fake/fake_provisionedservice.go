@@ -19,7 +19,7 @@ limitations under the License.
 package fake
 
 import (
-	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -30,13 +30,13 @@ import (
 
 // FakeProvisionedServices implements ProvisionedServiceInterface
 type FakeProvisionedServices struct {
-	Fake *FakeBindingsV1alpha1
+	Fake *FakeServiceV1alpha1
 	ns   string
 }
 
-var provisionedservicesResource = schema.GroupVersionResource{Group: "bindings.projectriff.io", Version: "v1alpha1", Resource: "provisionedservices"}
+var provisionedservicesResource = schema.GroupVersionResource{Group: "service.binding", Version: "v1alpha1", Resource: "provisionedservices"}
 
-var provisionedservicesKind = schema.GroupVersionKind{Group: "bindings.projectriff.io", Version: "v1alpha1", Kind: "ProvisionedService"}
+var provisionedservicesKind = schema.GroupVersionKind{Group: "service.binding", Version: "v1alpha1", Kind: "ProvisionedService"}
 
 // Get takes name of the provisionedService, and returns the corresponding provisionedService object, and an error if there is any.
 func (c *FakeProvisionedServices) Get(name string, options v1.GetOptions) (result *v1alpha1.ProvisionedService, err error) {

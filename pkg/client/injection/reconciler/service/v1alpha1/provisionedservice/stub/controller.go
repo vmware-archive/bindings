@@ -21,8 +21,8 @@ package provisionedservice
 import (
 	context "context"
 
-	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/provisionedservice"
-	v1alpha1provisionedservice "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/provisionedservice"
+	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/provisionedservice"
+	v1alpha1provisionedservice "github.com/projectriff/bindings/pkg/client/injection/reconciler/service/v1alpha1/provisionedservice"
 	configmap "knative.dev/pkg/configmap"
 	controller "knative.dev/pkg/controller"
 	logging "knative.dev/pkg/logging"

@@ -21,8 +21,8 @@ package fake
 import (
 	context "context"
 
-	servicebinding "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
 	fake "github.com/projectriff/bindings/pkg/client/injection/informers/factory/fake"
+	servicebinding "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/servicebinding"
 	controller "knative.dev/pkg/controller"
 	injection "knative.dev/pkg/injection"
 )
@@ -35,6 +35,6 @@ func init() {
 
 func withInformer(ctx context.Context) (context.Context, controller.Informer) {
 	f := fake.Get(ctx)
-	inf := f.Bindings().V1alpha1().ServiceBindings()
+	inf := f.Service().V1alpha1().ServiceBindings()
 	return context.WithValue(ctx, servicebinding.Key{}, inf), inf.Informer()
 }

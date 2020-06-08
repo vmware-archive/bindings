@@ -21,7 +21,7 @@ package v1alpha1
 import (
 	"time"
 
-	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	scheme "github.com/projectriff/bindings/pkg/client/clientset/versioned/scheme"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	types "k8s.io/apimachinery/pkg/types"
@@ -56,7 +56,7 @@ type serviceBindings struct {
 }
 
 // newServiceBindings returns a ServiceBindings
-func newServiceBindings(c *BindingsV1alpha1Client, namespace string) *serviceBindings {
+func newServiceBindings(c *ServiceV1alpha1Client, namespace string) *serviceBindings {
 	return &serviceBindings{
 		client: c.RESTClient(),
 		ns:     namespace,

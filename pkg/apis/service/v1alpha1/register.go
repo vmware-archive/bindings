@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	GroupName = "bindings.projectriff.io"
+	GroupName = "service.binding"
 )
 
 var (
@@ -49,10 +49,8 @@ var (
 // Adds the list of known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&ProvisionedService{},
-		&ProvisionedServiceList{},
-		&ImageBinding{},
-		&ImageBindingList{},
+		&ServiceBinding{},
+		&ServiceBindingList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

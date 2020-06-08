@@ -19,32 +19,27 @@ limitations under the License.
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	"github.com/projectriff/bindings/pkg/client/clientset/versioned/scheme"
 	rest "k8s.io/client-go/rest"
 )
 
-type BindingsV1alpha1Interface interface {
+type ServiceV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	ImageBindingsGetter
-	ProvisionedServicesGetter
+	ServiceBindingsGetter
 }
 
-// BindingsV1alpha1Client is used to interact with features provided by the bindings.projectriff.io group.
-type BindingsV1alpha1Client struct {
+// ServiceV1alpha1Client is used to interact with features provided by the service.binding group.
+type ServiceV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *BindingsV1alpha1Client) ImageBindings(namespace string) ImageBindingInterface {
-	return newImageBindings(c, namespace)
+func (c *ServiceV1alpha1Client) ServiceBindings(namespace string) ServiceBindingInterface {
+	return newServiceBindings(c, namespace)
 }
 
-func (c *BindingsV1alpha1Client) ProvisionedServices(namespace string) ProvisionedServiceInterface {
-	return newProvisionedServices(c, namespace)
-}
-
-// NewForConfig creates a new BindingsV1alpha1Client for the given config.
-func NewForConfig(c *rest.Config) (*BindingsV1alpha1Client, error) {
+// NewForConfig creates a new ServiceV1alpha1Client for the given config.
+func NewForConfig(c *rest.Config) (*ServiceV1alpha1Client, error) {
 	config := *c
 	if err := setConfigDefaults(&config); err != nil {
 		return nil, err
@@ -53,12 +48,12 @@ func NewForConfig(c *rest.Config) (*BindingsV1alpha1Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &BindingsV1alpha1Client{client}, nil
+	return &ServiceV1alpha1Client{client}, nil
 }
 
-// NewForConfigOrDie creates a new BindingsV1alpha1Client for the given config and
+// NewForConfigOrDie creates a new ServiceV1alpha1Client for the given config and
 // panics if there is an error in the config.
-func NewForConfigOrDie(c *rest.Config) *BindingsV1alpha1Client {
+func NewForConfigOrDie(c *rest.Config) *ServiceV1alpha1Client {
 	client, err := NewForConfig(c)
 	if err != nil {
 		panic(err)
@@ -66,9 +61,9 @@ func NewForConfigOrDie(c *rest.Config) *BindingsV1alpha1Client {
 	return client
 }
 
-// New creates a new BindingsV1alpha1Client for the given RESTClient.
-func New(c rest.Interface) *BindingsV1alpha1Client {
-	return &BindingsV1alpha1Client{c}
+// New creates a new ServiceV1alpha1Client for the given RESTClient.
+func New(c rest.Interface) *ServiceV1alpha1Client {
+	return &ServiceV1alpha1Client{c}
 }
 
 func setConfigDefaults(config *rest.Config) error {
@@ -86,7 +81,7 @@ func setConfigDefaults(config *rest.Config) error {
 
 // RESTClient returns a RESTClient that is used to communicate
 // with API server by this client implementation.
-func (c *BindingsV1alpha1Client) RESTClient() rest.Interface {
+func (c *ServiceV1alpha1Client) RESTClient() rest.Interface {
 	if c == nil {
 		return nil
 	}

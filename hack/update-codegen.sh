@@ -36,13 +36,13 @@ chmod +x ${KNATIVE_CODEGEN_PKG}/hack/generate-knative.sh
 #                  instead of the $GOPATH directly. For normal projects this can be dropped.
 ${CODEGEN_PKG}/generate-groups.sh "deepcopy,client,informer,lister" \
   github.com/projectriff/bindings/pkg/client github.com/projectriff/bindings/pkg/apis \
-  "bindings:v1alpha1 duck:v1alpha1" \
+  "bindings:v1alpha1 duck:v1alpha1 service:v1alpha1" \
   --go-header-file ${REPO_ROOT}/hack/boilerplate/boilerplate.go.txt
 
 # Knative Injection
 ${KNATIVE_CODEGEN_PKG}/hack/generate-knative.sh "injection" \
   github.com/projectriff/bindings/pkg/client github.com/projectriff/bindings/pkg/apis \
-  "bindings:v1alpha1 duck:v1alpha1" \
+  "bindings:v1alpha1 duck:v1alpha1 service:v1alpha1" \
   --go-header-file ${REPO_ROOT}/hack/boilerplate/boilerplate.go.txt
 
 # Make sure our dependencies are up-to-date

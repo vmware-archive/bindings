@@ -19,8 +19,8 @@ package servicebinding
 import (
 	"context"
 
-	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	serviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/bindings/v1alpha1/servicebinding"
+	"github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
+	serviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/servicebinding"
 	"github.com/projectriff/bindings/pkg/resolver"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"

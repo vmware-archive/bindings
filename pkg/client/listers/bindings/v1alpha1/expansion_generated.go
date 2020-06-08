@@ -33,11 +33,3 @@ type ProvisionedServiceListerExpansion interface{}
 // ProvisionedServiceNamespaceListerExpansion allows custom methods to be added to
 // ProvisionedServiceNamespaceLister.
 type ProvisionedServiceNamespaceListerExpansion interface{}
-
-// ServiceBindingListerExpansion allows custom methods to be added to
-// ServiceBindingLister.
-type ServiceBindingListerExpansion interface{}
-
-// ServiceBindingNamespaceListerExpansion allows custom methods to be added to
-// ServiceBindingNamespaceLister.
-type ServiceBindingNamespaceListerExpansion interface{}

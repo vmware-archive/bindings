@@ -24,6 +24,8 @@ import (
 	fakebindingsv1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/bindings/v1alpha1/fake"
 	duckv1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/duck/v1alpha1"
 	fakeduckv1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/duck/v1alpha1/fake"
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/service/v1alpha1"
+	fakeservicev1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/service/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -86,4 +88,9 @@ func (c *Clientset) BindingsV1alpha1() bindingsv1alpha1.BindingsV1alpha1Interfac
 // DuckV1alpha1 retrieves the DuckV1alpha1Client
 func (c *Clientset) DuckV1alpha1() duckv1alpha1.DuckV1alpha1Interface {
 	return &fakeduckv1alpha1.FakeDuckV1alpha1{Fake: &c.Fake}
+}
+
+// ServiceV1alpha1 retrieves the ServiceV1alpha1Client
+func (c *Clientset) ServiceV1alpha1() servicev1alpha1.ServiceV1alpha1Interface {
+	return &fakeservicev1alpha1.FakeServiceV1alpha1{Fake: &c.Fake}
 }

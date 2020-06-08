@@ -21,10 +21,10 @@ package v1alpha1
 import (
 	time "time"
 
-	bindingsv1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	versioned "github.com/projectriff/bindings/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/projectriff/bindings/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/projectriff/bindings/pkg/client/listers/bindings/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/client/listers/service/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -61,16 +61,16 @@ func NewFilteredServiceBindingInformer(client versioned.Interface, namespace str
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().ServiceBindings(namespace).List(options)
+				return client.ServiceV1alpha1().ServiceBindings(namespace).List(options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.BindingsV1alpha1().ServiceBindings(namespace).Watch(options)
+				return client.ServiceV1alpha1().ServiceBindings(namespace).Watch(options)
 			},
 		},
-		&bindingsv1alpha1.ServiceBinding{},
+		&servicev1alpha1.ServiceBinding{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *serviceBindingInformer) defaultInformer(client versioned.Interface, res
 }
 
 func (f *serviceBindingInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&bindingsv1alpha1.ServiceBinding{}, f.defaultInformer)
+	return f.factory.InformerFor(&servicev1alpha1.ServiceBinding{}, f.defaultInformer)
 }
 
 func (f *serviceBindingInformer) Lister() v1alpha1.ServiceBindingLister {

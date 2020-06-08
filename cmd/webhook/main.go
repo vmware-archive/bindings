@@ -40,6 +40,7 @@ import (
 	"knative.dev/pkg/webhook/resourcesemantics/validation"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
 	"github.com/projectriff/bindings/pkg/reconciler/provisionedservice"
 	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
@@ -67,9 +68,9 @@ var (
 	}
 )
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"): &v1alpha1.ProvisionedService{},
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):       &v1alpha1.ImageBinding{},
-	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):     &v1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"):    &v1alpha1.ProvisionedService{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):          &v1alpha1.ImageBinding{},
+	servicev1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &servicev1alpha1.ServiceBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {

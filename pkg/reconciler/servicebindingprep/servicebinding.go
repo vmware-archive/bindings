@@ -35,6 +35,7 @@ import (
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
 	"knative.dev/pkg/reconciler"
+	"knative.dev/pkg/tracker"
 )
 
 // newReconciledNormal makes a new reconciler event with event type Normal, and
@@ -50,6 +51,7 @@ type Reconciler struct {
 	secretLister corev1listers.SecretLister
 
 	resolver *resolver.ServiceableResolver
+	tracker  tracker.Interface
 }
 
 // Check that our Reconciler implements Interface
@@ -91,6 +93,12 @@ func (r *Reconciler) projectedSecret(ctx context.Context, logger *zap.SugaredLog
 	if err != nil {
 		return nil, err
 	}
+	r.tracker.TrackReference(tracker.Reference{
+		APIVersion: "v1",
+		Kind:       "Secret",
+		Namespace:  binding.Namespace,
+		Name:       providerRef.Name,
+	}, binding)
 	reference, err := r.secretLister.Secrets(binding.Namespace).Get(providerRef.Name)
 	if apierrs.IsNotFound(err) {
 		return nil, nil

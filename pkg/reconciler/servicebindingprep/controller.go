@@ -19,14 +19,18 @@ package servicebindingprep
 import (
 	"context"
 
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	servicebindinginformer "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/servicebinding"
 	servicebindingreconciler "github.com/projectriff/bindings/pkg/client/injection/reconciler/service/v1alpha1/servicebinding"
 	"github.com/projectriff/bindings/pkg/resolver"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/tools/cache"
 	kubeclient "knative.dev/pkg/client/injection/kube/client"
 	secretinformer "knative.dev/pkg/client/injection/kube/informers/core/v1/secret"
 	"knative.dev/pkg/configmap"
 	"knative.dev/pkg/controller"
 	"knative.dev/pkg/logging"
+	"knative.dev/pkg/tracker"
 )
 
 // NewController creates a Reconciler and returns the result of NewImpl.
@@ -49,7 +53,20 @@ func NewController(
 	logger.Info("Setting up event handlers.")
 
 	serviceBindingInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
-	// TODO do we need to wire up the tracker here as well?
+
+	handleMatchingControllers := cache.FilteringResourceEventHandler{
+		FilterFunc: controller.FilterControllerGK(servicev1alpha1.Kind("ServiceBinding")),
+		Handler:    controller.HandleAll(impl.EnqueueControllerOf),
+	}
+	secretInformer.Informer().AddEventHandler(handleMatchingControllers)
+
+	r.tracker = tracker.New(impl.EnqueueKey, controller.GetTrackerLease(ctx))
+	secretInformer.Informer().AddEventHandler(controller.HandleAll(
+		controller.EnsureTypeMeta(
+			r.tracker.OnChanged,
+			corev1.SchemeGroupVersion.WithKind("Secret"),
+		),
+	))
 
 	return impl
 }

@@ -42,6 +42,9 @@ rules:
   - apiGroups: ["bindings.projectriff.io"]
     resources: ["*"]
     verbs: ["*"]
+  - apiGroups: ["service.binding"]
+    resources: ["*"]
+    verbs: ["*"]
 ---
 # This piece of the aggregated cluster role enables us to bind to the built-in
 # Kubernetes apps resources

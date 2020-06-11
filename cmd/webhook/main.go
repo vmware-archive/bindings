@@ -40,9 +40,11 @@ import (
 	"knative.dev/pkg/webhook/resourcesemantics/validation"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	"github.com/projectriff/bindings/pkg/reconciler/bindableservice"
+	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/provisionedservice"
 	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/servicebindingprep"
 )
 
 var (
@@ -67,9 +69,9 @@ var (
 	}
 )
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("BindableService"): &v1alpha1.BindableService{},
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):    &v1alpha1.ImageBinding{},
-	v1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):  &v1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):              &v1alpha1.ImageBinding{},
+	servicev1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"): &servicev1alpha1.ProvisionedService{},
+	servicev1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):     &servicev1alpha1.ServiceBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
@@ -137,7 +139,10 @@ func NewBindingWebhook(resource string, gla psbinding.GetListAll, wcf WithContex
 		selector = psbinding.WithSelector(InclusionSelector)
 	}
 	return func(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
-		wc := wcf(ctx, func(types.NamespacedName) {})
+		var wc psbinding.BindableContext
+		if wcf != nil {
+			wc = wcf(ctx, func(types.NamespacedName) {})
+		}
 		return psbinding.NewAdmissionController(ctx,
 			// Name of the resource webhook.
 			fmt.Sprintf("%s.webhook.bindings.projectriff.io", resource),
@@ -173,9 +178,10 @@ func main() {
 		NewConfigValidationController,
 
 		// For each binding we have a controller and a binding webhook.
-		bindableservice.NewController,
 		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
-		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
+		provisionedservice.NewController,
+		// TODO(scothis) merge prep and main servicebinding controllers
+		servicebindingprep.NewController, servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nil),
 	)
 }
 

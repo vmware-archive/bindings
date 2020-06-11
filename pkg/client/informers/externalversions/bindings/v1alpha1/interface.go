@@ -24,12 +24,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// BindableServices returns a BindableServiceInformer.
-	BindableServices() BindableServiceInformer
 	// ImageBindings returns a ImageBindingInformer.
 	ImageBindings() ImageBindingInformer
-	// ServiceBindings returns a ServiceBindingInformer.
-	ServiceBindings() ServiceBindingInformer
 }
 
 type version struct {
@@ -43,17 +39,7 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// BindableServices returns a BindableServiceInformer.
-func (v *version) BindableServices() BindableServiceInformer {
-	return &bindableServiceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
 // ImageBindings returns a ImageBindingInformer.
 func (v *version) ImageBindings() ImageBindingInformer {
 	return &imageBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// ServiceBindings returns a ServiceBindingInformer.
-func (v *version) ServiceBindings() ServiceBindingInformer {
-	return &serviceBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

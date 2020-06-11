@@ -26,9 +26,7 @@ import (
 
 type BindingsV1alpha1Interface interface {
 	RESTClient() rest.Interface
-	BindableServicesGetter
 	ImageBindingsGetter
-	ServiceBindingsGetter
 }
 
 // BindingsV1alpha1Client is used to interact with features provided by the bindings.projectriff.io group.
@@ -36,16 +34,8 @@ type BindingsV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *BindingsV1alpha1Client) BindableServices(namespace string) BindableServiceInterface {
-	return newBindableServices(c, namespace)
-}
-
 func (c *BindingsV1alpha1Client) ImageBindings(namespace string) ImageBindingInterface {
 	return newImageBindings(c, namespace)
-}
-
-func (c *BindingsV1alpha1Client) ServiceBindings(namespace string) ServiceBindingInterface {
-	return newServiceBindings(c, namespace)
 }
 
 // NewForConfig creates a new BindingsV1alpha1Client for the given config.

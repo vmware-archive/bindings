@@ -5,7 +5,7 @@ metadata:
   labels:
     app: test
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: test
@@ -16,4 +16,4 @@ spec:
     spec:
       containers:
         - name: test-container
-          image: ubuntu:bionic
+          image: scothis/petclinic

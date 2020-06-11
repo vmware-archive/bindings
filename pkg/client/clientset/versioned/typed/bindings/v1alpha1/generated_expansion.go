@@ -18,8 +18,4 @@ limitations under the License.
 
 package v1alpha1
 
-type BindableServiceExpansion interface{}
-
 type ImageBindingExpansion interface{}
-
-type ServiceBindingExpansion interface{}

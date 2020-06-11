@@ -41,7 +41,7 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	}
 
 	newVolumes := sets.NewString()
-	sb := GetServiceableBinding(ctx)
+	sb := b.Status.Binding
 	if sb == nil {
 		return
 	}

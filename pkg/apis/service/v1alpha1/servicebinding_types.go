@@ -3,6 +3,7 @@ package v1alpha1
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -19,6 +20,7 @@ const (
 )
 
 // +genclient
+// +genreconciler
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 type ServiceBinding struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -42,6 +44,14 @@ var (
 type ServiceBindingSpec struct {
 	// Name of the service binding on disk, defaults to this resource's name
 	Name string `json:"name,omitempty"`
+	// Type of the provisioned service. The value is exposed directly as the
+	// `type` in the mounted binding
+	// +optional
+	Type string `json:"type,omitempty`
+	// Provider of the provisioned service. The value is exposed directly as the
+	// `provider` in the mounted binding
+	// +optional
+	Provider string `json:"provider,omitempty`
 
 	// Application resource to inject the binding into
 	Application *ApplicationReference `json:"application,omitempty"`
@@ -60,6 +70,7 @@ type ApplicationReference struct {
 
 type ServiceBindingStatus struct {
 	duckv1beta1.Status `json:",inline"`
+	Binding            *corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

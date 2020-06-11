@@ -23,7 +23,8 @@ import (
 )
 
 const (
-	GroupName = "service.binding"
+	GroupName              = "service.binding"
+	ServiceBindingLabelKey = GroupName + "/servicebinding"
 )
 
 var (

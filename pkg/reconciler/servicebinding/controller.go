@@ -20,11 +20,9 @@ import (
 	"context"
 
 	"github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
-	serviceinformer "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/servicebinding"
-	"github.com/projectriff/bindings/pkg/resolver"
+	servicebindinginformer "github.com/projectriff/bindings/pkg/client/injection/informers/service/v1alpha1/servicebinding"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -49,7 +47,7 @@ func NewController(
 	cmw configmap.Watcher,
 ) *controller.Impl {
 	logger := logging.FromContext(ctx)
-	serviceInformer := serviceinformer.Get(ctx)
+	serviceBindingInformer := servicebindinginformer.Get(ctx)
 	nsInformer := nsinformer.Get(ctx)
 	dc := dynamicclient.Get(ctx)
 
@@ -57,7 +55,7 @@ func NewController(
 	c := &psbinding.BaseReconciler{
 		GVR: v1alpha1.SchemeGroupVersion.WithResource("servicebindings"),
 		Get: func(namespace string, name string) (psbinding.Bindable, error) {
-			return serviceInformer.Lister().ServiceBindings(namespace).Get(name)
+			return serviceBindingInformer.Lister().ServiceBindings(namespace).Get(name)
 		},
 		DynamicClient: dc,
 		Recorder: record.NewBroadcaster().NewRecorder(
@@ -66,11 +64,10 @@ func NewController(
 	}
 
 	impl := controller.NewImpl(c, logger, "ServiceBindings")
-	c.WithContext = WithContextFactory(ctx, impl.EnqueueKey)
 
 	logger.Info("Setting up event handlers")
 
-	serviceInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
+	serviceBindingInformer.Informer().AddEventHandler(controller.HandleAll(impl.Enqueue))
 
 	c.Tracker = tracker.New(impl.EnqueueKey, controller.GetTrackerLease(ctx))
 	c.Factory = &duck.CachedInformerFactory{
@@ -83,13 +80,13 @@ func NewController(
 }
 
 func ListAll(ctx context.Context, handler cache.ResourceEventHandler) psbinding.ListAll {
-	serviceInformer := serviceinformer.Get(ctx)
+	serviceBindingInformer := servicebindinginformer.Get(ctx)
 
 	// Whenever a ServiceBinding changes our webhook programming might change.
-	serviceInformer.Informer().AddEventHandler(handler)
+	serviceBindingInformer.Informer().AddEventHandler(handler)
 
 	return func() ([]psbinding.Bindable, error) {
-		l, err := serviceInformer.Lister().List(labels.Everything())
+		l, err := serviceBindingInformer.Lister().List(labels.Everything())
 		if err != nil {
 			return nil, err
 		}
@@ -98,17 +95,5 @@ func ListAll(ctx context.Context, handler cache.ResourceEventHandler) psbinding.
 			bl = append(bl, elt)
 		}
 		return bl, nil
-	}
-}
-
-func WithContextFactory(ctx context.Context, handler func(name types.NamespacedName)) psbinding.BindableContext {
-	r := resolver.NewServiceableResolver(ctx, handler)
-	return func(ctx context.Context, b psbinding.Bindable) (context.Context, error) {
-		sb := b.(*v1alpha1.ServiceBinding)
-		serviceableBinding, err := r.ServiceableFromObjectReference(sb.Spec.Service, sb)
-		if err != nil {
-			return nil, err
-		}
-		return v1alpha1.WithServiceableBinding(ctx, serviceableBinding), nil
 	}
 }

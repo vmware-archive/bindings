@@ -44,6 +44,7 @@ import (
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
 	"github.com/projectriff/bindings/pkg/reconciler/provisionedservice"
 	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
+	"github.com/projectriff/bindings/pkg/reconciler/servicebindingprep"
 )
 
 var (
@@ -138,7 +139,10 @@ func NewBindingWebhook(resource string, gla psbinding.GetListAll, wcf WithContex
 		selector = psbinding.WithSelector(InclusionSelector)
 	}
 	return func(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
-		wc := wcf(ctx, func(types.NamespacedName) {})
+		var wc psbinding.BindableContext
+		if wcf != nil {
+			wc = wcf(ctx, func(types.NamespacedName) {})
+		}
 		return psbinding.NewAdmissionController(ctx,
 			// Name of the resource webhook.
 			fmt.Sprintf("%s.webhook.bindings.projectriff.io", resource),
@@ -176,7 +180,8 @@ func main() {
 		// For each binding we have a controller and a binding webhook.
 		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
 		provisionedservice.NewController,
-		servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, servicebinding.WithContextFactory),
+		// TODO(scothis) merge prep and main servicebinding controllers
+		servicebindingprep.NewController, servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nil),
 	)
 }
 

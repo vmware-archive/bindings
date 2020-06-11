@@ -21,6 +21,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	v1 "k8s.io/api/core/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	intstr "k8s.io/apimachinery/pkg/util/intstr"
 	tracker "knative.dev/pkg/tracker"
@@ -235,6 +236,11 @@ func (in *ServiceBindingSpec) DeepCopy() *ServiceBindingSpec {
 func (in *ServiceBindingStatus) DeepCopyInto(out *ServiceBindingStatus) {
 	*out = *in
 	in.Status.DeepCopyInto(&out.Status)
+	if in.Binding != nil {
+		in, out := &in.Binding, &out.Binding
+		*out = new(v1.LocalObjectReference)
+		**out = **in
+	}
 	return
 }
 

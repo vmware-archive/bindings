@@ -52,8 +52,8 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 		ps.Spec.Template.Spec.Volumes = append(ps.Spec.Template.Spec.Volumes, corev1.Volume{
 			Name: bindingVolume,
 			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: *sb,
+				Secret: &corev1.SecretVolumeSource{
+					SecretName: sb.Name,
 				},
 			},
 		})

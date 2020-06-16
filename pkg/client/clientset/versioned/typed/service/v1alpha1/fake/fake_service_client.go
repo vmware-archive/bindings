@@ -28,10 +28,6 @@ type FakeServiceV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeServiceV1alpha1) ProvisionedServices(namespace string) v1alpha1.ProvisionedServiceInterface {
-	return &FakeProvisionedServices{c, namespace}
-}
-
 func (c *FakeServiceV1alpha1) ServiceBindings(namespace string) v1alpha1.ServiceBindingInterface {
 	return &FakeServiceBindings{c, namespace}
 }

@@ -21,7 +21,7 @@ package provisionedservice
 import (
 	context "context"
 
-	v1alpha1 "github.com/projectriff/bindings/pkg/client/informers/externalversions/service/v1alpha1"
+	v1alpha1 "github.com/projectriff/bindings/pkg/client/informers/externalversions/bindings/v1alpha1"
 	factory "github.com/projectriff/bindings/pkg/client/injection/informers/factory"
 	controller "knative.dev/pkg/controller"
 	injection "knative.dev/pkg/injection"
@@ -37,7 +37,7 @@ type Key struct{}
 
 func withInformer(ctx context.Context) (context.Context, controller.Informer) {
 	f := factory.Get(ctx)
-	inf := f.Service().V1alpha1().ProvisionedServices()
+	inf := f.Bindings().V1alpha1().ProvisionedServices()
 	return context.WithValue(ctx, Key{}, inf), inf.Informer()
 }
 
@@ -46,7 +46,7 @@ func Get(ctx context.Context) v1alpha1.ProvisionedServiceInformer {
 	untyped := ctx.Value(Key{})
 	if untyped == nil {
 		logging.FromContext(ctx).Panic(
-			"Unable to fetch github.com/projectriff/bindings/pkg/client/informers/externalversions/service/v1alpha1.ProvisionedServiceInformer from context.")
+			"Unable to fetch github.com/projectriff/bindings/pkg/client/informers/externalversions/bindings/v1alpha1.ProvisionedServiceInformer from context.")
 	}
 	return untyped.(v1alpha1.ProvisionedServiceInformer)
 }

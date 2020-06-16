@@ -21,8 +21,8 @@ package provisionedservice
 import (
 	context "context"
 
-	v1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
-	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/reconciler/service/v1alpha1/provisionedservice"
+	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
+	provisionedservice "github.com/projectriff/bindings/pkg/client/injection/reconciler/bindings/v1alpha1/provisionedservice"
 	v1 "k8s.io/api/core/v1"
 	reconciler "knative.dev/pkg/reconciler"
 )

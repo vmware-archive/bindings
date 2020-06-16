@@ -18,14 +18,6 @@ limitations under the License.
 
 package v1alpha1
 
-// ProvisionedServiceListerExpansion allows custom methods to be added to
-// ProvisionedServiceLister.
-type ProvisionedServiceListerExpansion interface{}
-
-// ProvisionedServiceNamespaceListerExpansion allows custom methods to be added to
-// ProvisionedServiceNamespaceLister.
-type ProvisionedServiceNamespaceListerExpansion interface{}
-
 // ServiceBindingListerExpansion allows custom methods to be added to
 // ServiceBindingLister.
 type ServiceBindingListerExpansion interface{}

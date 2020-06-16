@@ -11,12 +11,12 @@ spec:
     containers:
     - test-container
   service:
-    apiVersion: service.binding/v1alpha1
+    apiVersion: bindings.projectriff.io/v1alpha1
     kind: ProvisionedService
     name: account-db
 
 ---
-apiVersion: service.binding/v1alpha1
+apiVersion: bindings.projectriff.io/v1alpha1
 kind: ProvisionedService
 metadata:
   name: account-db

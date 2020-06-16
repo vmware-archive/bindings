@@ -25,3 +25,11 @@ type ImageBindingListerExpansion interface{}
 // ImageBindingNamespaceListerExpansion allows custom methods to be added to
 // ImageBindingNamespaceLister.
 type ImageBindingNamespaceListerExpansion interface{}
+
+// ProvisionedServiceListerExpansion allows custom methods to be added to
+// ProvisionedServiceLister.
+type ProvisionedServiceListerExpansion interface{}
+
+// ProvisionedServiceNamespaceListerExpansion allows custom methods to be added to
+// ProvisionedServiceNamespaceLister.
+type ProvisionedServiceNamespaceListerExpansion interface{}

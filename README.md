@@ -39,7 +39,7 @@ status:
 A `ProvisionedService` resource is included which implements the Provisioned Service duck-type. This resource can expose an existing secret as a provisioned service.
 
 ```yaml
-apiVersion: service.binding/v1alpha1
+apiVersion: bindings.projectriff.io/v1alpha1
 kind: ProvisionedService
 metadata:
   name: account-db

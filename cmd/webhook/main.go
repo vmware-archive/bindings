@@ -69,9 +69,9 @@ var (
 	}
 )
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):              &v1alpha1.ImageBinding{},
-	servicev1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"): &servicev1alpha1.ProvisionedService{},
-	servicev1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"):     &servicev1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):          &v1alpha1.ImageBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"):    &v1alpha1.ProvisionedService{},
+	servicev1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &servicev1alpha1.ServiceBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {

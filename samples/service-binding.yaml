@@ -23,7 +23,7 @@ metadata:
 spec:
   binding:
     name: account-db-service
-#status: # status is created by the ProvisionedService controller, but implements the duck-type
+#status: # status is created by the ProvisionedService controller, and is what implements the duck-type
 #  binding:
 #    name: account-db-service
 

@@ -12,5 +12,5 @@ spec:
   source:
     git:
       url: https://github.com/projectriff/fats
-      revision: master
+      revision: main
     subPath: applications/uppercase/node

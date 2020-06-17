@@ -66,7 +66,7 @@ jobs:
     needs: stage
     if: |
       github.event_name == 'push' && startsWith(github.repository, 'projectriff/') && (
-        github.ref == 'refs/heads/master' || (
+        github.ref == 'refs/heads/main' || (
           startsWith(github.ref, 'refs/heads/v') && endsWith(github.ref, 'x')
         )
       )

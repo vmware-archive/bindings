@@ -124,7 +124,10 @@ func (r *Reconciler) projectedSecret(ctx context.Context, logger *zap.SugaredLog
 }
 
 func (c *Reconciler) createProjectedSecret(binding *servicev1alpha1.ServiceBinding, reference *corev1.Secret) (*corev1.Secret, error) {
-	projection := resources.MakeProjectedSecret(binding, reference)
+	projection, err := resources.MakeProjectedSecret(binding, reference)
+	if err != nil {
+		return nil, err
+	}
 	return c.kubeclient.CoreV1().Secrets(binding.Namespace).Create(projection)
 }
 
@@ -139,7 +142,10 @@ func (c *Reconciler) reconcileProtectedSecret(ctx context.Context, binding *serv
 	// In the case of an upgrade, there can be default values set that don't exist pre-upgrade.
 	// We are setting the up-to-date default values here so an update won't be triggered if the only
 	// diff is the new default values.
-	desiredProjection := resources.MakeProjectedSecret(binding, reference)
+	desiredProjection, err := resources.MakeProjectedSecret(binding, reference)
+	if err != nil {
+		return nil, err
+	}
 
 	if equals, err := projectedSecretSemanticEquals(ctx, desiredProjection, existing); err != nil {
 		return nil, err

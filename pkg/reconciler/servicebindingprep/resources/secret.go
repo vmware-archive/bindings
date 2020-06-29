@@ -17,7 +17,9 @@ limitations under the License.
 package resources
 
 import (
+	"bytes"
 	"fmt"
+	"text/template"
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +28,7 @@ import (
 	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 )
 
-func MakeProjectedSecret(binding *servicev1alpha1.ServiceBinding, reference *corev1.Secret) *corev1.Secret {
+func MakeProjectedSecret(binding *servicev1alpha1.ServiceBinding, reference *corev1.Secret) (*corev1.Secret, error) {
 	projection := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			// TODO generate the secret name
@@ -46,6 +48,23 @@ func MakeProjectedSecret(binding *servicev1alpha1.ServiceBinding, reference *cor
 	if binding.Spec.Provider != "" {
 		projection.Data["provider"] = []byte(binding.Spec.Provider)
 	}
+	for _, m := range binding.Spec.Mappings {
+		t, err := template.New("").Parse(m.Value)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid template for mapping %s: %w", m.Name, err)
+		}
+		buf := bytes.NewBuffer([]byte{})
+		// convert map[string][]byte to map[string]string
+		values := make(map[string]string, len(projection.Data))
+		for k, v := range projection.Data {
+			values[k] = string(v)
+		}
+		err = t.Execute(buf, values)
+		if err != nil {
+			return nil, fmt.Errorf("Error executing template for mapping %s: %w", m.Name, err)
+		}
+		projection.Data[m.Name] = buf.Bytes()
+	}
 
-	return projection
+	return projection, nil
 }

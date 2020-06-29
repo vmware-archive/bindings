@@ -59,8 +59,12 @@ type ServiceBindingSpec struct {
 	Service *tracker.Reference `json:"service,omitempty"`
 
 	// Env projects keys from the binding secret into the application as
-	// environment variables.
+	// environment variables
 	Env []EnvVar `json:"env,omitempty"`
+
+	// Mappings create new binding secret keys from literal values or templated
+	// from existing keys
+	Mappings []Mapping `json:"mappings,omitempty"`
 }
 
 type ApplicationReference struct {
@@ -75,6 +79,11 @@ type ApplicationReference struct {
 type EnvVar struct {
 	Name string `json:"name"`
 	Key  string `json:"key"`
+}
+
+type Mapping struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
 }
 
 type ServiceBindingStatus struct {
@@ -118,6 +127,12 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 		)
 		// TODO look for conflicting names
 	}
+	for i, m := range b.Spec.Mappings {
+		errs = errs.Also(
+			m.Validate(ctx).ViaFieldIndex("mappings", i),
+		)
+		// TODO look for conflicting names
+	}
 
 	return errs
 }
@@ -131,6 +146,16 @@ func (e EnvVar) Validate(ctx context.Context) (errs *apis.FieldError) {
 	if e.Key == "" {
 		errs = errs.Also(
 			apis.ErrMissingField("key"),
+		)
+	}
+
+	return errs
+}
+
+func (m Mapping) Validate(ctx context.Context) (errs *apis.FieldError) {
+	if m.Name == "" {
+		errs = errs.Also(
+			apis.ErrMissingField("name"),
 		)
 	}
 

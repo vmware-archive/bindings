@@ -14,6 +14,9 @@ spec:
     apiVersion: bindings.projectriff.io/v1alpha1
     kind: ProvisionedService
     name: account-db
+  env:
+  - name: MYSQL_HOST
+    key: host
 
 ---
 apiVersion: bindings.projectriff.io/v1alpha1

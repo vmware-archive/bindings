@@ -63,13 +63,13 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	for i := range ps.Spec.Template.Spec.InitContainers {
 		c := &ps.Spec.Template.Spec.InitContainers[i]
 		if b.isTargetContainer(-1, c) {
-			b.DoContainer(ctx, ps, c, bindingVolume)
+			b.DoContainer(ctx, ps, c, bindingVolume, sb.Name)
 		}
 	}
 	for i := range ps.Spec.Template.Spec.Containers {
 		c := &ps.Spec.Template.Spec.Containers[i]
 		if b.isTargetContainer(i, c) {
-			b.DoContainer(ctx, ps, c, bindingVolume)
+			b.DoContainer(ctx, ps, c, bindingVolume, sb.Name)
 		}
 	}
 
@@ -77,7 +77,7 @@ func (b *ServiceBinding) Do(ctx context.Context, ps *v1.WithPod) {
 	ps.Annotations[b.annotationKey()] = strings.Join(newVolumes.List(), ",")
 }
 
-func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, bindingVolume string) {
+func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, bindingVolume, secretName string) {
 	mountPath := ""
 	// lookup predefined mount path
 	for _, e := range c.Env {
@@ -108,6 +108,20 @@ func (b *ServiceBinding) DoContainer(ctx context.Context, ps *v1.WithPod, c *cor
 			ReadOnly:  true,
 		})
 	}
+
+	for _, e := range b.Spec.Env {
+		c.Env = append(c.Env, corev1.EnvVar{
+			Name: e.Name,
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: secretName,
+					},
+					Key: e.Key,
+				},
+			},
+		})
+	}
 }
 
 func (b *ServiceBinding) isTargetContainer(idx int, c *corev1.Container) bool {
@@ -136,26 +150,31 @@ func (b *ServiceBinding) Undo(ctx context.Context, ps *v1.WithPod) {
 	}
 
 	boundVolumes := sets.NewString(strings.Split(ps.Annotations[b.annotationKey()], ",")...)
+	boundSecrets := sets.NewString()
 
 	preservedVolumes := []corev1.Volume{}
 	for _, v := range ps.Spec.Template.Spec.Volumes {
 		if !boundVolumes.Has(v.Name) {
 			preservedVolumes = append(preservedVolumes, v)
+			continue
+		}
+		if v.Secret != nil {
+			boundSecrets = boundSecrets.Insert(v.Secret.SecretName)
 		}
 	}
 	ps.Spec.Template.Spec.Volumes = preservedVolumes
 
 	for i := range ps.Spec.Template.Spec.InitContainers {
-		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], &boundVolumes)
+		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.InitContainers[i], boundVolumes, boundSecrets)
 	}
 	for i := range ps.Spec.Template.Spec.Containers {
-		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], &boundVolumes)
+		b.UndoContainer(ctx, ps, &ps.Spec.Template.Spec.Containers[i], boundVolumes, boundSecrets)
 	}
 
 	delete(ps.Annotations, b.annotationKey())
 }
 
-func (b *ServiceBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, boundVolumes *sets.String) {
+func (b *ServiceBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *corev1.Container, boundVolumes, boundSecrets sets.String) {
 	preservedMounts := []corev1.VolumeMount{}
 	for _, vm := range c.VolumeMounts {
 		if !boundVolumes.Has(vm.Name) {
@@ -163,6 +182,14 @@ func (b *ServiceBinding) UndoContainer(ctx context.Context, ps *v1.WithPod, c *c
 		}
 	}
 	c.VolumeMounts = preservedMounts
+
+	preservedEnv := []corev1.EnvVar{}
+	for _, e := range c.Env {
+		if e.ValueFrom == nil || e.ValueFrom.SecretKeyRef == nil || !boundSecrets.Has(e.ValueFrom.SecretKeyRef.Name) {
+			preservedEnv = append(preservedEnv, e)
+		}
+	}
+	c.Env = preservedEnv
 }
 
 func (b *ServiceBinding) annotationKey() string {

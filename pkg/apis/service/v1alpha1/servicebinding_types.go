@@ -57,6 +57,10 @@ type ServiceBindingSpec struct {
 	Application *ApplicationReference `json:"application,omitempty"`
 	// Service referencing the binding secret
 	Service *tracker.Reference `json:"service,omitempty"`
+
+	// Env projects keys from the binding secret into the application as
+	// environment variables.
+	Env []EnvVar `json:"env,omitempty"`
 }
 
 type ApplicationReference struct {
@@ -66,6 +70,11 @@ type ApplicationReference struct {
 	// will be injected. Containers may be specified by index or name.
 	// InitContainers may only be specified by name.
 	Containers []intstr.IntOrString `json:"containers,omitempty"`
+}
+
+type EnvVar struct {
+	Name string `json:"name"`
+	Key  string `json:"key"`
 }
 
 type ServiceBindingStatus struct {
@@ -101,6 +110,27 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	if b.Spec.Service.Name == "" {
 		errs = errs.Also(
 			apis.ErrMissingField("spec.service.name"),
+		)
+	}
+	for i, e := range b.Spec.Env {
+		errs = errs.Also(
+			e.Validate(ctx).ViaFieldIndex("env", i),
+		)
+		// TODO look for conflicting names
+	}
+
+	return errs
+}
+
+func (e EnvVar) Validate(ctx context.Context) (errs *apis.FieldError) {
+	if e.Name == "" {
+		errs = errs.Also(
+			apis.ErrMissingField("name"),
+		)
+	}
+	if e.Key == "" {
+		errs = errs.Also(
+			apis.ErrMissingField("key"),
 		)
 	}
 

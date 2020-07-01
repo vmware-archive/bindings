@@ -1,7 +1,7 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-admin
+  name: service-binding-admin
   labels:
     bindings.projectriff.io/release: devel
 aggregationRule:
@@ -13,7 +13,7 @@ rules: [] # Rules are automatically filled in by the controller manager.
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-core
+  name: service-binding-core
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"
@@ -34,7 +34,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-crd
+  name: service-binding-crd
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"
@@ -51,7 +51,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-apps
+  name: service-binding-apps
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"
@@ -68,7 +68,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-knative-serving
+  name: service-binding-knative-serving
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"
@@ -83,7 +83,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-kpack
+  name: service-binding-kpack
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"
@@ -97,7 +97,7 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: binding-system-riff
+  name: service-binding-riff
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/controller: "true"

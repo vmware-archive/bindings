@@ -16,7 +16,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: config-logging
-  namespace: binding-system
+  namespace: service-binding
   labels:
     bindings.projectriff.io/release: devel
 

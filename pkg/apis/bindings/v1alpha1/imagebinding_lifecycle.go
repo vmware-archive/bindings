@@ -23,6 +23,14 @@ var imgCondSet = apis.NewLivingConditionSet(
 	ImageBindingConditionBindingAvailable,
 )
 
+func (b *ImageBinding) GetStatus() *duckv1.Status {
+	return &b.Status.Status
+}
+
+func (b *ImageBinding) GetConditionSet() apis.ConditionSet {
+	return imgCondSet
+}
+
 func (b *ImageBinding) GetSubject() tracker.Reference {
 	return *b.Spec.Subject
 }

@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/kmeta"
 	"knative.dev/pkg/tracker"
 	"knative.dev/pkg/webhook/psbinding"
@@ -35,6 +35,7 @@ var (
 	_ apis.Validatable   = (*ServiceBinding)(nil)
 	_ apis.Defaultable   = (*ServiceBinding)(nil)
 	_ kmeta.OwnerRefable = (*ServiceBinding)(nil)
+	_ duckv1.KRShaped    = (*ServiceBinding)(nil)
 
 	// Check is Bindable
 	_ psbinding.Bindable  = (*ServiceBinding)(nil)
@@ -87,8 +88,8 @@ type Mapping struct {
 }
 
 type ServiceBindingStatus struct {
-	duckv1beta1.Status `json:",inline"`
-	Binding            *corev1.LocalObjectReference `json:"binding,omitempty"`
+	duckv1.Status `json:",inline"`
+	Binding       *corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -105,7 +106,7 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	)
 	if b.Spec.Application.Namespace != b.Namespace {
 		errs = errs.Also(
-			apis.ErrInvalidValue(b.Spec.Application.Namespace, "spec.application.namespace"),
+			apis.ErrDisallowedFields("spec.application.namespace"),
 		)
 	}
 	errs = errs.Also(
@@ -113,7 +114,7 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	)
 	if b.Spec.Service.Namespace != b.Namespace {
 		errs = errs.Also(
-			apis.ErrInvalidValue(b.Spec.Service.Namespace, "spec.service.namespace"),
+			apis.ErrDisallowedFields("spec.service.namespace"),
 		)
 	}
 	if b.Spec.Service.Name == "" {
@@ -123,15 +124,21 @@ func (b *ServiceBinding) Validate(ctx context.Context) (errs *apis.FieldError) {
 	}
 	for i, e := range b.Spec.Env {
 		errs = errs.Also(
-			e.Validate(ctx).ViaFieldIndex("env", i),
+			e.Validate(ctx).ViaFieldIndex("env", i).ViaField("spec"),
 		)
 		// TODO look for conflicting names
 	}
 	for i, m := range b.Spec.Mappings {
 		errs = errs.Also(
-			m.Validate(ctx).ViaFieldIndex("mappings", i),
+			m.Validate(ctx).ViaFieldIndex("mappings", i).ViaField("spec"),
 		)
 		// TODO look for conflicting names
+	}
+
+	if b.Status.Annotations != nil {
+		errs = errs.Also(
+			apis.ErrDisallowedFields("status.annotations"),
+		)
 	}
 
 	return errs

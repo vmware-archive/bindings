@@ -7,7 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/kmeta"
 )
 
@@ -31,6 +31,7 @@ var (
 	_ apis.Validatable   = (*ProvisionedService)(nil)
 	_ apis.Defaultable   = (*ProvisionedService)(nil)
 	_ kmeta.OwnerRefable = (*ProvisionedService)(nil)
+	_ duckv1.KRShaped    = (*ProvisionedService)(nil)
 )
 
 type ProvisionedServiceSpec struct {
@@ -38,8 +39,8 @@ type ProvisionedServiceSpec struct {
 }
 
 type ProvisionedServiceStatus struct {
-	duckv1beta1.Status `json:",inline"`
-	Binding            corev1.LocalObjectReference `json:"binding,omitempty"`
+	duckv1.Status `json:",inline"`
+	Binding       corev1.LocalObjectReference `json:"binding,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

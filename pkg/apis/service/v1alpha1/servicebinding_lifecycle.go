@@ -10,6 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	v1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/tracker"
 )
@@ -22,6 +23,14 @@ const (
 var serviceCondSet = apis.NewLivingConditionSet(
 	ServiceBindingConditionBindingAvailable,
 )
+
+func (b *ServiceBinding) GetStatus() *duckv1.Status {
+	return &b.Status.Status
+}
+
+func (b *ServiceBinding) GetConditionSet() apis.ConditionSet {
+	return serviceCondSet
+}
 
 func (b *ServiceBinding) GetSubject() tracker.Reference {
 	return b.Spec.Application.Reference

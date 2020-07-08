@@ -12,8 +12,8 @@ require (
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/code-generator v0.18.0
 	k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29
-	knative.dev/pkg v0.0.0-20200603171018-252bb787598f
-	knative.dev/test-infra v0.0.0-20200603202617-ff3e9ecc9e60
+	knative.dev/pkg v0.0.0-20200702222342-ea4d6e985ba0 // pin to branch release-0.16
+	knative.dev/test-infra v0.0.0-20200630141629-15f40fe97047 // pin to branch release-0.16
 )
 
 replace (
@@ -25,11 +25,11 @@ replace (
 
 	github.com/prometheus/client_golang => github.com/prometheus/client_golang v0.9.2
 
-	k8s.io/api => k8s.io/api v0.16.4
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.16.4
-	k8s.io/apimachinery => k8s.io/apimachinery v0.16.4
-	k8s.io/apiserver => k8s.io/apiserver v0.16.4
-	k8s.io/client-go => k8s.io/client-go v0.16.4
-	k8s.io/code-generator => k8s.io/code-generator v0.16.4
-	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20190816220812-743ec37842bf
+	k8s.io/api => k8s.io/api v0.17.6
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.17.6
+	k8s.io/apimachinery => k8s.io/apimachinery v0.17.6
+	k8s.io/apiserver => k8s.io/apiserver v0.17.6
+	k8s.io/client-go => k8s.io/client-go v0.17.6
+	k8s.io/code-generator => k8s.io/code-generator v0.17.6
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410145947-bcb3869e6f29
 )

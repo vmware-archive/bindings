@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"knative.dev/pkg/apis"
 	"knative.dev/pkg/apis/duck"
-	duckv1beta1 "knative.dev/pkg/apis/duck/v1beta1"
+	duckv1 "knative.dev/pkg/apis/duck/v1"
 	"knative.dev/pkg/kmeta"
 	"knative.dev/pkg/tracker"
 	"knative.dev/pkg/webhook/psbinding"
@@ -28,6 +28,7 @@ var (
 	_ apis.Validatable   = (*ImageBinding)(nil)
 	_ apis.Defaultable   = (*ImageBinding)(nil)
 	_ kmeta.OwnerRefable = (*ImageBinding)(nil)
+	_ duckv1.KRShaped    = (*ImageBinding)(nil)
 
 	// Check is Bindable
 	_ psbinding.Bindable  = (*ImageBinding)(nil)
@@ -41,7 +42,7 @@ type ImageBindingSpec struct {
 }
 
 type ImageBindingStatus struct {
-	duckv1beta1.Status `json:",inline"`
+	duckv1.Status `json:",inline"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

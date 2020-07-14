@@ -19,16 +19,12 @@ package v1alpha1
 import (
 	"testing"
 
-	rduckv1alpha1 "github.com/projectriff/bindings/pkg/apis/duck/v1alpha1"
 	"knative.dev/pkg/apis/duck"
 	duckv1alpha1 "knative.dev/pkg/apis/duck/v1alpha1"
 )
 
 func TestImplementsBinding(t *testing.T) {
 	if err := duck.VerifyType(&ImageBinding{}, &duckv1alpha1.Binding{}); err != nil {
-		t.Fatal(err)
-	}
-	if err := duck.VerifyType(&ProvisionedService{}, &rduckv1alpha1.Serviceable{}); err != nil {
 		t.Fatal(err)
 	}
 }

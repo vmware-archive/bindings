@@ -26,8 +26,6 @@ import (
 type Interface interface {
 	// ImageBindings returns a ImageBindingInformer.
 	ImageBindings() ImageBindingInformer
-	// ProvisionedServices returns a ProvisionedServiceInformer.
-	ProvisionedServices() ProvisionedServiceInformer
 }
 
 type version struct {
@@ -44,9 +42,4 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 // ImageBindings returns a ImageBindingInformer.
 func (v *version) ImageBindings() ImageBindingInformer {
 	return &imageBindingInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
-}
-
-// ProvisionedServices returns a ProvisionedServiceInformer.
-func (v *version) ProvisionedServices() ProvisionedServiceInformer {
-	return &provisionedServiceInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }

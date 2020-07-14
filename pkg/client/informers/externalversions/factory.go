@@ -26,7 +26,6 @@ import (
 	versioned "github.com/projectriff/bindings/pkg/client/clientset/versioned"
 	bindings "github.com/projectriff/bindings/pkg/client/informers/externalversions/bindings"
 	internalinterfaces "github.com/projectriff/bindings/pkg/client/informers/externalversions/internalinterfaces"
-	service "github.com/projectriff/bindings/pkg/client/informers/externalversions/service"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
@@ -174,13 +173,8 @@ type SharedInformerFactory interface {
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
 	Bindings() bindings.Interface
-	Service() service.Interface
 }
 
 func (f *sharedInformerFactory) Bindings() bindings.Interface {
 	return bindings.New(f, f.namespace, f.tweakListOptions)
-}
-
-func (f *sharedInformerFactory) Service() service.Interface {
-	return service.New(f, f.namespace, f.tweakListOptions)
 }

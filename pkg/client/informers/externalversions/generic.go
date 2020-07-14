@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	v1alpha1 "github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )
@@ -56,12 +55,6 @@ func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource
 	// Group=bindings.projectriff.io, Version=v1alpha1
 	case v1alpha1.SchemeGroupVersion.WithResource("imagebindings"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().ImageBindings().Informer()}, nil
-	case v1alpha1.SchemeGroupVersion.WithResource("provisionedservices"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Bindings().V1alpha1().ProvisionedServices().Informer()}, nil
-
-		// Group=service.binding, Version=v1alpha1
-	case servicev1alpha1.SchemeGroupVersion.WithResource("servicebindings"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Service().V1alpha1().ServiceBindings().Informer()}, nil
 
 	}
 

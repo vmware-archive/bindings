@@ -40,11 +40,7 @@ import (
 	"knative.dev/pkg/webhook/resourcesemantics/validation"
 
 	"github.com/projectriff/bindings/pkg/apis/bindings/v1alpha1"
-	servicev1alpha1 "github.com/projectriff/bindings/pkg/apis/service/v1alpha1"
 	"github.com/projectriff/bindings/pkg/reconciler/imagebinding"
-	"github.com/projectriff/bindings/pkg/reconciler/provisionedservice"
-	"github.com/projectriff/bindings/pkg/reconciler/servicebinding"
-	"github.com/projectriff/bindings/pkg/reconciler/servicebindingprep"
 )
 
 var (
@@ -69,9 +65,7 @@ var (
 	}
 )
 var ourTypes = map[schema.GroupVersionKind]resourcesemantics.GenericCRD{
-	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"):          &v1alpha1.ImageBinding{},
-	v1alpha1.SchemeGroupVersion.WithKind("ProvisionedService"):    &v1alpha1.ProvisionedService{},
-	servicev1alpha1.SchemeGroupVersion.WithKind("ServiceBinding"): &servicev1alpha1.ServiceBinding{},
+	v1alpha1.SchemeGroupVersion.WithKind("ImageBinding"): &v1alpha1.ImageBinding{},
 }
 
 func NewDefaultingAdmissionController(ctx context.Context, cmw configmap.Watcher) *controller.Impl {
@@ -179,9 +173,6 @@ func main() {
 
 		// For each binding we have a controller and a binding webhook.
 		imagebinding.NewController, NewBindingWebhook("imagebindings", imagebinding.ListAll, imagebinding.WithContextFactory),
-		provisionedservice.NewController,
-		// TODO(scothis) merge prep and main servicebinding controllers
-		servicebindingprep.NewController, servicebinding.NewController, NewBindingWebhook("servicebindings", servicebinding.ListAll, nil),
 	)
 }
 

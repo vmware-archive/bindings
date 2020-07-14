@@ -23,7 +23,6 @@ import (
 
 	bindingsv1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/bindings/v1alpha1"
 	duckv1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/duck/v1alpha1"
-	servicev1alpha1 "github.com/projectriff/bindings/pkg/client/clientset/versioned/typed/service/v1alpha1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
@@ -33,7 +32,6 @@ type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	BindingsV1alpha1() bindingsv1alpha1.BindingsV1alpha1Interface
 	DuckV1alpha1() duckv1alpha1.DuckV1alpha1Interface
-	ServiceV1alpha1() servicev1alpha1.ServiceV1alpha1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -42,7 +40,6 @@ type Clientset struct {
 	*discovery.DiscoveryClient
 	bindingsV1alpha1 *bindingsv1alpha1.BindingsV1alpha1Client
 	duckV1alpha1     *duckv1alpha1.DuckV1alpha1Client
-	serviceV1alpha1  *servicev1alpha1.ServiceV1alpha1Client
 }
 
 // BindingsV1alpha1 retrieves the BindingsV1alpha1Client
@@ -53,11 +50,6 @@ func (c *Clientset) BindingsV1alpha1() bindingsv1alpha1.BindingsV1alpha1Interfac
 // DuckV1alpha1 retrieves the DuckV1alpha1Client
 func (c *Clientset) DuckV1alpha1() duckv1alpha1.DuckV1alpha1Interface {
 	return c.duckV1alpha1
-}
-
-// ServiceV1alpha1 retrieves the ServiceV1alpha1Client
-func (c *Clientset) ServiceV1alpha1() servicev1alpha1.ServiceV1alpha1Interface {
-	return c.serviceV1alpha1
 }
 
 // Discovery retrieves the DiscoveryClient
@@ -89,10 +81,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 	if err != nil {
 		return nil, err
 	}
-	cs.serviceV1alpha1, err = servicev1alpha1.NewForConfig(&configShallowCopy)
-	if err != nil {
-		return nil, err
-	}
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
@@ -107,7 +95,6 @@ func NewForConfigOrDie(c *rest.Config) *Clientset {
 	var cs Clientset
 	cs.bindingsV1alpha1 = bindingsv1alpha1.NewForConfigOrDie(c)
 	cs.duckV1alpha1 = duckv1alpha1.NewForConfigOrDie(c)
-	cs.serviceV1alpha1 = servicev1alpha1.NewForConfigOrDie(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClientForConfigOrDie(c)
 	return &cs
@@ -118,7 +105,6 @@ func New(c rest.Interface) *Clientset {
 	var cs Clientset
 	cs.bindingsV1alpha1 = bindingsv1alpha1.New(c)
 	cs.duckV1alpha1 = duckv1alpha1.New(c)
-	cs.serviceV1alpha1 = servicev1alpha1.New(c)
 
 	cs.DiscoveryClient = discovery.NewDiscoveryClient(c)
 	return &cs

@@ -9,6 +9,6 @@ spec:
     name: test-deployment
   containerName: test-container
   provider:
-    name: test-image
-    apiVersion: build.pivotal.io/v1alpha1
-    kind: Image
+    name: petclinic
+    apiVersion: build.projectriff.io/v1alpha1
+    kind: Application

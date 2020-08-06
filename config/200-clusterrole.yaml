@@ -1,22 +1,22 @@
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-admin
+  name: image-binding-admin
   labels:
     bindings.projectriff.io/release: devel
 aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
-      service.binding/controller: "true"
+      bindings.projectriff.io/controller: "true"
 rules: [] # Rules are automatically filled in by the controller manager.
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-core
+  name: image-binding-core
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: [""]
     resources: ["configmaps", "services", "secrets", "events", "namespaces"]
@@ -34,15 +34,12 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-crd
+  name: image-binding-crd
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: ["bindings.projectriff.io"]
-    resources: ["*"]
-    verbs: ["*"]
-  - apiGroups: ["service.binding"]
     resources: ["*"]
     verbs: ["*"]
 ---
@@ -51,10 +48,10 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-apps
+  name: image-binding-apps
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: ["apps"]
     resources: ["deployments", "daemonsets", "statefulsets"]
@@ -68,10 +65,10 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-knative-serving
+  name: image-binding-knative-serving
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: ["serving.knative.dev"]
     resources: ["services", "configurations"]
@@ -83,10 +80,10 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-kpack
+  name: image-binding-kpack
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: ["build.pivotal.io"]
     resources: ["images"]
@@ -97,10 +94,10 @@ rules:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: service-binding-riff
+  name: image-binding-riff
   labels:
     bindings.projectriff.io/release: devel
-    service.binding/controller: "true"
+    bindings.projectriff.io/controller: "true"
 rules:
   - apiGroups: ["build.projectriff.io"]
     resources: ["applications", "containers", "functions"]

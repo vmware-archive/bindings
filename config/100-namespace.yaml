@@ -15,7 +15,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: service-binding
+  name: image-binding
   labels:
     istio-injection: enabled
     bindings.projectriff.io/release: devel

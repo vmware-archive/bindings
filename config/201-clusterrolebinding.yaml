@@ -15,14 +15,14 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: service-binding-controller-admin
+  name: image-binding-controller-admin
   labels:
     bindings.projectriff.io/release: devel
 subjects:
   - kind: ServiceAccount
     name: controller
-    namespace: service-binding
+    namespace: image-binding
 roleRef:
   kind: ClusterRole
-  name: service-binding-admin
+  name: image-binding-admin
   apiGroup: rbac.authorization.k8s.io

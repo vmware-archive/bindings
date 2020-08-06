@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: webhook
-  namespace: service-binding
+  namespace: image-binding
   labels:
     bindings.projectriff.io/release: devel
     bindings.projectriff.io/exclude: "true"

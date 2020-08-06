@@ -19,7 +19,7 @@ metadata:
     role: webhook
     bindings.projectriff.io/release: devel
   name: webhook
-  namespace: service-binding
+  namespace: image-binding
 spec:
   ports:
     - port: 443

@@ -107,10 +107,11 @@ jobs:
         fi
 
         echo "Capture snapshot slug"
-        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${git_branch}
-        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/builds/${version}
+        echo "${slug}" > slug.txt
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp slug.txt gs://projectriff/riff-bindings/versions/builds/${git_branch}
+        gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp slug.txt gs://projectriff/riff-bindings/versions/builds/${version}
         if [[ ${version} != *"-snapshot" ]] ; then
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${git_branch}
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp slug.txt gs://projectriff/riff-bindings/versions/releases/${git_branch}
           # avoids overwriting existing values
-          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n <(echo "${slug}") gs://projectriff/riff-bindings/versions/releases/${version}
+          gsutil -h 'Content-Type: text/plain' -h 'Cache-Control: private' cp -n slug.txt gs://projectriff/riff-bindings/versions/releases/${version}
         fi
